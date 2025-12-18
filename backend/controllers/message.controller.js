@@ -73,7 +73,7 @@ export const getConversations = async (req, res) => {
 		const userId = req.user._id;
 		const conversations = await Conversation.find({ participants: userId }).populate({
 			path: "participants",
-			select: "fullName username profilePic",
+			select: "fullName username profilePic publicKey",
 		}).populate({
 			path: "messages",
 			options: { sort: { createdAt: -1 }, limit: 1 }, // Последнее сообщение
