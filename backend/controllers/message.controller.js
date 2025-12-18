@@ -21,7 +21,8 @@ export const sendMessage = async (req, res) => {
 		const newMessage = new Message({
 			senderId,
 			receiverId,
-			message,
+			message: encryptedMessage,
+			plainMessage: message,
 		});
 
 		if (newMessage) {

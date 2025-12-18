@@ -10,19 +10,23 @@ import { useAuthContext } from "../context/AuthContext";
 const useListenMessages = () => {
 	const { socket } = useSocketContext();
 	const { messages, setMessages } = useConversation();
-	const { privateKey } = useAuthContext();
+	const { privateKey, authUser } = useAuthContext();
 
 	useEffect(() => {
 		socket?.on("newMessage", async (newMessage) => {
-			if (privateKey) {
+			let message;
+			if (newMessage.senderId === authUser._id) {
+				message = newMessage.plainMessage;
+			} else if (privateKey) {
 				try {
 					const privateKeyObj = await importPrivateKey(privateKey);
-					newMessage.message = await decryptMessage(newMessage.message, privateKeyObj);
+					message = await decryptMessage(newMessage.message, privateKeyObj);
 				} catch (error) {
 					console.error("Decrypt error in realtime:", error);
-					newMessage.message = "Error decrypting message";
+					message = "Error decrypting message";
 				}
 			}
+			newMessage.message = message;
 			newMessage.shouldShake = true;
 			const sound = new Audio(notificationSound);
 			sound.play();
@@ -30,6 +34,6 @@ const useListenMessages = () => {
 		});
 
 		return () => socket?.off("newMessage");
-	}, [socket, setMessages, messages, privateKey]);
+	}, [socket, setMessages, messages, privateKey, authUser]);
 };
 export default useListenMessages;

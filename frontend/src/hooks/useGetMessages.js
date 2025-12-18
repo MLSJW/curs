@@ -7,7 +7,7 @@ import { useAuthContext } from "../context/AuthContext";
 const useGetMessages = () => {
 	const [loading, setLoading] = useState(false);
 	const { messages, setMessages, selectedConversation } = useConversation();
-	const { privateKey } = useAuthContext();
+	const { privateKey, authUser } = useAuthContext();
 
 	useEffect(() => {
 		const getMessages = async () => {
@@ -19,12 +19,18 @@ const useGetMessages = () => {
 
 				const privateKeyObj = await importPrivateKey(privateKey);
 				const decryptedMessages = await Promise.all(data.map(async (msg) => {
-					try {
-						return { ...msg, message: await decryptMessage(msg.message, privateKeyObj) };
-					} catch (error) {
-						console.error("Decrypt error:", error);
-						return { ...msg, message: "Error decrypting message" };
+					let message;
+					if (msg.senderId === authUser._id) {
+						message = msg.plainMessage;
+					} else {
+						try {
+							message = await decryptMessage(msg.message, privateKeyObj);
+						} catch (error) {
+							console.error("Decrypt error:", error);
+							message = "Error decrypting message";
+						}
 					}
+					return { ...msg, message };
 				}));
 				setMessages(decryptedMessages);
 			} catch (error) {
@@ -34,8 +40,8 @@ const useGetMessages = () => {
 			}
 		};
 
-		if (selectedConversation?.participant?._id && privateKey) getMessages();
-	}, [selectedConversation?.participant?._id, setMessages, privateKey]);
+		if (selectedConversation?.participant?._id && privateKey && authUser) getMessages();
+	}, [selectedConversation?.participant?._id, setMessages, privateKey, authUser]);
 
 	return { messages, loading };
 };
