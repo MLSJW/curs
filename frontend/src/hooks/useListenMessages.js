@@ -15,8 +15,13 @@ const useListenMessages = () => {
 	useEffect(() => {
 		socket?.on("newMessage", async (newMessage) => {
 			if (privateKey) {
-				const privateKeyObj = await importPrivateKey(privateKey);
-				newMessage.message = await decryptMessage(newMessage.message, privateKeyObj);
+				try {
+					const privateKeyObj = await importPrivateKey(privateKey);
+					newMessage.message = await decryptMessage(newMessage.message, privateKeyObj);
+				} catch (error) {
+					console.error("Decrypt error in realtime:", error);
+					newMessage.message = "Error decrypting message";
+				}
 			}
 			newMessage.shouldShake = true;
 			const sound = new Audio(notificationSound);
