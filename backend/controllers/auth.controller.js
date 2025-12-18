@@ -21,8 +21,8 @@ export const signup = async (req, res) => {
 		const hashedPassword = await bcrypt.hash(password, salt);
 
 
-		const boyProfilePic = `https://pixelbox.ru/wp-content/uploads/2021/11/avatar-whatsapp-pixelbox.ru-36.jpg`;
-		const girlProfilePic = `https://klike.net/uploads/posts/2023-02/1675749734_3-39.jpg`;
+		const boyProfilePic = `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7Bii1KzhQKysxW4Rli2tw3vsoZ_d9mEO7ew&s`;
+		const girlProfilePic = `https://avatars.mds.yandex.net/i?id=7c385f5ec8c62930220726878781cb7fe23b5db9-5487972-images-thumbs&n=13`;
 
 		const newUser = new User({
 			fullName,
