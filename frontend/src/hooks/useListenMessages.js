@@ -4,7 +4,7 @@ import { useSocketContext } from "../context/SocketContext";
 import useConversation from "../zustand/useConversation";
 
 import notificationSound from "../assets/sounds/notification.mp3";
-import { decryptMessage, importPrivateKey } from "../utils/crypto";
+import { decryptMessage, importPrivateKey, importAESKey, decryptAES } from "../utils/crypto";
 import { useAuthContext } from "../context/AuthContext";
 
 const useListenMessages = () => {
@@ -20,7 +20,10 @@ const useListenMessages = () => {
 			} else if (privateKey) {
 				try {
 					const privateKeyObj = await importPrivateKey(privateKey);
-					message = await decryptMessage(newMessage.message, privateKeyObj);
+					const decryptedKey = await decryptMessage(newMessage.encryptedKey, privateKeyObj);
+					const aesKey = await importAESKey(decryptedKey);
+					const encryptedData = JSON.parse(newMessage.message);
+					message = await decryptAES(encryptedData, aesKey);
 				} catch (error) {
 					console.error("Decrypt error in realtime:", error);
 					message = "Error decrypting message";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import useConversation from "../zustand/useConversation";
 import toast from "react-hot-toast";
-import { decryptMessage, importPrivateKey } from "../utils/crypto";
+import { decryptMessage, importPrivateKey, importAESKey, decryptAES } from "../utils/crypto";
 import { useAuthContext } from "../context/AuthContext";
 
 const useGetMessages = () => {
@@ -24,7 +24,10 @@ const useGetMessages = () => {
 						message = msg.plainMessage;
 					} else {
 						try {
-							message = await decryptMessage(msg.message, privateKeyObj);
+							const decryptedKey = await decryptMessage(msg.encryptedKey, privateKeyObj);
+							const aesKey = await importAESKey(decryptedKey);
+							const encryptedData = JSON.parse(msg.message);
+							message = await decryptAES(encryptedData, aesKey);
 						} catch (error) {
 							console.error("Decrypt error:", error);
 							message = "Error decrypting message";

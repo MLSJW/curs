@@ -10,16 +10,26 @@ const useSendMessage = () => {
 	const sendMessage = async (message) => {
 		setLoading(true);
 		try {
+			// Генерация AES ключа
+			const aesKey = await generateAESKey();
+			// Шифрование сообщения AES
+			const encryptedData = await encryptAES(message, aesKey);
+			// Экспорт AES ключа
+			const aesKeyBase64 = await exportAESKey(aesKey);
 			// Импорт публичного ключа получателя
 			const publicKey = await importPublicKey(selectedConversation.participant.publicKey);
-			const encryptedMessage = await encryptMessage(message, publicKey);
+			// Шифрование AES ключа RSA
+			const encryptedKey = await encryptMessage(aesKeyBase64, publicKey);
 
 			const res = await fetch(`/api/messages/send/${selectedConversation.participant._id}`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				body: JSON.stringify({ message: encryptedMessage }),
+				body: JSON.stringify({
+					message: JSON.stringify(encryptedData),
+					encryptedKey,
+				}),
 			});
 			const data = await res.json();
 			if (data.error) throw new Error(data.error);
