@@ -12,6 +12,15 @@ export const generateKeyPair = async () => {
     return keyPair;
 };
 
+// Генерация AES ключа
+export const generateAESKey = async () => {
+    return await crypto.subtle.generateKey(
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+};
+
 // Шифрование сообщения AES
 export const encryptAES = async (message, key) => {
     const iv = crypto.getRandomValues(new Uint8Array(12));
