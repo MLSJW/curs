@@ -19,7 +19,17 @@ const useListenMessages = () => {
 				try {
 					const privateKeyObj = await importPrivateKey(privateKey);
 					// if I am sender -> use encryptedKeySender; else use encryptedKey
-					const keyToUse = newMessage.senderId === authUser._id ? newMessage.encryptedKeySender : newMessage.encryptedKey;
+					const isSender = newMessage.senderId === authUser._id;
+					const keyToUse = isSender ? newMessage.encryptedKeySender : newMessage.encryptedKey;
+					if (!keyToUse) {
+						message = isSender
+							? "[Не удаётся расшифровать: сообщение отправлено до обновления]"
+							: "[Не удаётся расшифровать: отсутствует ключ]";
+						newMessage.message = message;
+						newMessage.shouldShake = true;
+						setMessages((prev) => [...prev, newMessage]);
+						return;
+					}
 					const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
 					const aesKey = await importAESKey(decryptedKey);
 					const encryptedData = JSON.parse(newMessage.message);
@@ -34,7 +44,11 @@ const useListenMessages = () => {
 			newMessage.message = message;
 			newMessage.shouldShake = true;
 			const sound = new Audio(notificationSound);
-			sound.play();
+			try {
+				await sound.play();
+			} catch {
+				// ignore autoplay policy errors
+			}
 			setMessages((prev) => [...prev, newMessage]);
 		});
 

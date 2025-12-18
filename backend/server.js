@@ -17,7 +17,12 @@ const __dirname = path.resolve();
 // PORT should be assigned after calling dotenv.config() because we need to access the env variables. Didn't realize while recording the video. Sorry for the confusion.
 const PORT = process.env.PORT || 80;
 
-app.use(cors());
+app.use(
+	cors({
+		origin: true,
+		credentials: true,
+	})
+);
 app.use(express.json()); // to parse the incoming requests with JSON payloads (from req.body)
 app.use(cookieParser());
 

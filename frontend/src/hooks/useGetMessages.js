@@ -22,7 +22,14 @@ const useGetMessages = () => {
 					let message;
 					try {
 						// if I am sender -> use encryptedKeySender; else use encryptedKey
-						const keyToUse = msg.senderId === authUser._id ? msg.encryptedKeySender : msg.encryptedKey;
+						const isSender = msg.senderId === authUser._id;
+						const keyToUse = isSender ? msg.encryptedKeySender : msg.encryptedKey;
+						if (!keyToUse) {
+							message = isSender
+								? "[Не удаётся расшифровать: сообщение отправлено до обновления]"
+								: "[Не удаётся расшифровать: отсутствует ключ]";
+							return { ...msg, message };
+						}
 						const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
 						const aesKey = await importAESKey(decryptedKey);
 						const encryptedData = JSON.parse(msg.message);
