@@ -4,15 +4,20 @@ import { useSocketContext } from "../context/SocketContext";
 import useConversation from "../zustand/useConversation";
 
 import notificationSound from "../assets/sounds/notification.mp3";
-import { decryptMessage } from "../utils/encrypt";
+import { decryptMessage, importPrivateKey } from "../utils/crypto";
+import { useAuthContext } from "../context/AuthContext";
 
 const useListenMessages = () => {
 	const { socket } = useSocketContext();
 	const { messages, setMessages } = useConversation();
+	const { privateKey } = useAuthContext();
 
 	useEffect(() => {
-		socket?.on("newMessage", (newMessage) => {
-			newMessage.message = decryptMessage(newMessage.message);
+		socket?.on("newMessage", async (newMessage) => {
+			if (privateKey) {
+				const privateKeyObj = await importPrivateKey(privateKey);
+				newMessage.message = await decryptMessage(newMessage.message, privateKeyObj);
+			}
 			newMessage.shouldShake = true;
 			const sound = new Audio(notificationSound);
 			sound.play();
@@ -20,6 +25,6 @@ const useListenMessages = () => {
 		});
 
 		return () => socket?.off("newMessage");
-	}, [socket, setMessages, messages]);
+	}, [socket, setMessages, messages, privateKey]);
 };
 export default useListenMessages;

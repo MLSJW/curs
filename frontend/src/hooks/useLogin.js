@@ -1,10 +1,11 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuthContext } from "../context/AuthContext";
+import { generateKeyPair, exportPublicKey, exportPrivateKey } from "../utils/crypto";
 
 const useLogin = () => {
 	const [loading, setLoading] = useState(false);
-	const { setAuthUser } = useAuthContext();
+	const { setAuthUser, setPrivateKey } = useAuthContext();
 
 	const login = async (username, password) => {
 		const success = handleInputErrors(username, password);
@@ -24,6 +25,18 @@ const useLogin = () => {
 
 			localStorage.setItem("chat-user", JSON.stringify(data));
 			setAuthUser(data);
+
+			// Если нет privateKey, генерировать новые (для нового устройства)
+			let privateKeyBase64 = localStorage.getItem("private-key");
+			if (!privateKeyBase64) {
+				const keyPair = await generateKeyPair();
+				privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
+				localStorage.setItem("private-key", privateKeyBase64);
+				setPrivateKey(privateKeyBase64);
+				// TODO: обновить publicKey на сервере
+			} else {
+				setPrivateKey(privateKeyBase64);
+			}
 		} catch (error) {
 			toast.error(error.message);
 		} finally {

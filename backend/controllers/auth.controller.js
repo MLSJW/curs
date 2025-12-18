@@ -4,7 +4,7 @@ import generateTokenAndSetCookie from "../utils/generateToken.js";
 
 export const signup = async (req, res) => {
 	try {
-		const { fullName, username, password, confirmPassword, gender } = req.body;
+		const { fullName, username, password, confirmPassword, gender, publicKey } = req.body;
 
 		if (password !== confirmPassword) {
 			return res.status(400).json({ error: "Passwords don't match" });
@@ -30,6 +30,7 @@ export const signup = async (req, res) => {
 			password: hashedPassword,
 			gender,
 			profilePic: gender === "male" ? boyProfilePic : girlProfilePic,
+			publicKey,
 		});
 
 		if (newUser) {
@@ -42,6 +43,7 @@ export const signup = async (req, res) => {
 				fullName: newUser.fullName,
 				username: newUser.username,
 				profilePic: newUser.profilePic,
+				publicKey: newUser.publicKey,
 			});
 		} else {
 			res.status(400).json({ error: "Invalid user data" });
@@ -69,6 +71,7 @@ export const login = async (req, res) => {
 			fullName: user.fullName,
 			username: user.username,
 			profilePic: user.profilePic,
+			publicKey: user.publicKey,
 		});
 	} catch (error) {
 		console.log("Ошибка входа в контроллер", error.message);

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import useConversation from "../zustand/useConversation";
 import toast from "react-hot-toast";
-import { decryptMessage } from "../utils/encrypt";
+import { decryptMessage, importPrivateKey } from "../utils/crypto";
+import { useAuthContext } from "../context/AuthContext";
 
 const useGetMessages = () => {
 	const [loading, setLoading] = useState(false);
 	const { messages, setMessages, selectedConversation } = useConversation();
+	const { privateKey } = useAuthContext();
 
 	useEffect(() => {
 		const getMessages = async () => {
@@ -14,10 +16,12 @@ const useGetMessages = () => {
 				const res = await fetch(`/api/messages/${selectedConversation.participant._id}`);
 				const data = await res.json();
 				if (data.error) throw new Error(data.error);
-				const decryptedMessages = data.map(msg => ({
+
+				const privateKeyObj = await importPrivateKey(privateKey);
+				const decryptedMessages = await Promise.all(data.map(async (msg) => ({
 					...msg,
-					message: decryptMessage(msg.message)
-				}));
+					message: await decryptMessage(msg.message, privateKeyObj)
+				})));
 				setMessages(decryptedMessages);
 			} catch (error) {
 				toast.error(error.message);
@@ -26,8 +30,8 @@ const useGetMessages = () => {
 			}
 		};
 
-		if (selectedConversation?.participant?._id) getMessages();
-	}, [selectedConversation?.participant?._id, setMessages]);
+		if (selectedConversation?.participant?._id && privateKey) getMessages();
+	}, [selectedConversation?.participant?._id, setMessages, privateKey]);
 
 	return { messages, loading };
 };
