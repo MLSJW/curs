@@ -18,6 +18,7 @@ const useGetMessages = () => {
 				});
 				const data = await res.json();
 				if (data.error) throw new Error(data.error);
+				if (!Array.isArray(data)) throw new Error("Invalid messages payload (expected array)");
 
 				const privateKeyObj = await importPrivateKey(privateKey);
 				const decryptedMessages = await Promise.all(data.map(async (msg) => {

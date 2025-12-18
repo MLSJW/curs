@@ -16,6 +16,7 @@ const useGetConversations = () => {
 				if (data.error) {
 					throw new Error(data.error);
 				}
+				if (!Array.isArray(data)) throw new Error("Invalid conversations payload (expected array)");
 				setConversations(data);
 			} catch (error) {
 				toast.error(error.message);
