@@ -12,6 +12,10 @@ const useSendMessage = () => {
 	const sendMessage = async (message) => {
 		setLoading(true);
 		try {
+			if (!selectedConversation?.participant?._id) throw new Error("Чат не выбран");
+			if (!selectedConversation?.participant?.publicKey) throw new Error("У собеседника нет publicKey (нужна повторная регистрация/обновление ключей)");
+			if (!authUser?.publicKey) throw new Error("У вас нет publicKey (перелогиньтесь/перерегистрируйтесь)");
+
 			// Генерация AES ключа
 			const aesKey = await generateAESKey();
 			// Шифрование сообщения AES
@@ -31,6 +35,7 @@ const useSendMessage = () => {
 				headers: {
 					"Content-Type": "application/json",
 				},
+				credentials: "include",
 				body: JSON.stringify({
 					message: JSON.stringify(encryptedData),
 					encryptedKey,
