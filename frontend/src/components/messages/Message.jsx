@@ -34,16 +34,19 @@ const Message = ({ message }) => {
 
 		if (msgType === "audio" && message.fileUrl) {
 			return (
-				<audio 
-					controls 
-					className="w-full max-w-xs"
-				>
-					<source src={message.fileUrl} type="audio/webm" />
-					<source src={message.fileUrl} type="audio/ogg" />
-					<source src={message.fileUrl} type="audio/mpeg" />
-					<source src={message.fileUrl} type="audio/wav" />
-					Ваш браузер не поддерживает аудио элемент.
-				</audio>
+				<div className="min-w-[280px] max-w-md py-2">
+					<audio 
+						controls 
+						className="w-full h-10"
+						style={{ minHeight: '40px', cursor: 'pointer' }}
+					>
+						<source src={message.fileUrl} type="audio/webm" />
+						<source src={message.fileUrl} type="audio/ogg" />
+						<source src={message.fileUrl} type="audio/mpeg" />
+						<source src={message.fileUrl} type="audio/wav" />
+						Ваш браузер не поддерживает аудио элемент.
+					</audio>
+				</div>
 			);
 		}
 
