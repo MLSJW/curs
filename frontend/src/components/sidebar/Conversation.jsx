@@ -27,7 +27,7 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 					const isSender = lastMsg.senderId === authUser._id;
 					const keyToUse = isSender ? lastMsg.encryptedKeySender : lastMsg.encryptedKey;
 					if (!keyToUse) {
-						setPreview('Не удаётся расшифровать');
+						setPreview('Текст');
 						return;
 					}
 					const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
@@ -36,12 +36,12 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 					const message = await decryptAES(encryptedData, aesKey);
 					setPreview(message);
 				} catch (error) {
-					setPreview('Ошибка расшифровки');
+					setPreview('Текст');
 				}
 			};
 			decrypt();
 		} else if (lastMsg) {
-			setPreview(lastMsg.type === 'audio' ? 'Голосовое' : 'Изображение');
+			setPreview(lastMsg.type === 'audio' ? 'Голосовое' : lastMsg.type === 'image' ? 'Изображение' : 'Текст');
 		}
 	}, [lastMsg, authUser]);
 
@@ -84,7 +84,7 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 
 				{showDelete && (
 					<div className='flex items-center gap-2'>
-						<button className='btn btn-ghost btn-sm text-red-400' onClick={(e) => { e.stopPropagation(); onDelete?.(); }}>Удалить</button>
+						<button className='btn btn-ghost btn-sm text-red-400' onClick={(e) => { e.stopPropagation(); onDelete?.(); }}>⋮</button>
 					</div>
 				)}
 			</div>

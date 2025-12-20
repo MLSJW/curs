@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSocketContext } from "../context/SocketContext";
+import { useAuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
 
 const useGetConversations = () => {
 	const [loading, setLoading] = useState(false);
 	const [conversations, setConversations] = useState([]);
 	const { socket } = useSocketContext();
+	const { authUser } = useAuthContext();
 
 	useEffect(() => {
 		const getConversations = async () => {
@@ -50,15 +52,37 @@ const useGetConversations = () => {
 			setConversations((prev) => prev.map((c) => (c._id === conversationId ? { ...c, unreadCount: 0 } : c)));
 		};
 
+		const onNewMessage = (newMessage) => {
+			setConversations((prev) => {
+				const updated = prev.map((c) => {
+					const isParticipant = c.participant._id === newMessage.senderId || c.participant._id === newMessage.receiverId;
+					if (isParticipant) {
+						const newUnreadCount = newMessage.senderId !== authUser._id ? c.unreadCount + 1 : c.unreadCount;
+						return { ...c, lastMessage: newMessage, unreadCount: newUnreadCount };
+					}
+					return c;
+				});
+				// re-sort by lastMessage
+				updated.sort((a, b) => {
+					const ta = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+					const tb = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+					return tb - ta;
+				});
+				return updated;
+			});
+		};
+
 		socket.on("newConversation", onNewConversation);
 		socket.on("conversationDeleted", onConversationDeleted);
 		socket.on("messagesRead", onMessagesRead);
+		socket.on("newMessage", onNewMessage);
 		return () => {
 			socket.off("newConversation", onNewConversation);
 			socket.off("conversationDeleted", onConversationDeleted);
 			socket.off("messagesRead", onMessagesRead);
+			socket.off("newMessage", onNewMessage);
 		};
-	}, [socket]);
+	}, [socket, authUser]);
 
 	return { loading, conversations, setConversations };
 };
