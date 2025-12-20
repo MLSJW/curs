@@ -11,6 +11,8 @@ const MessageInput = () => {
 	const fileInputRef = useRef(null);
 	const { loading, sendMessage, sendAudioMessage, sendImageMessage } = useSendMessage();
 
+	const emojis = ['😀', '😂', '😍', '👍', '❤️', '😢', '😡', '🎉', '🔥', '💯'];
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (!message && !audioBlob && !selectedImage) return;
@@ -132,7 +134,7 @@ const MessageInput = () => {
 			
 			{showEmoji && (
 				<div className='absolute bottom-full mb-2 bg-gray-700 p-2 rounded flex flex-wrap gap-1 max-w-xs'>
-					{['😀', '😂', '😍', '👍', '❤️', '😢', '😡', '🎉', '🔥', '💯'].map(emj => (
+					{emojis.map(emj => (
 						<button 
 							key={emj} 
 							onClick={() => { setMessage(prev => prev + emj); setShowEmoji(false); }} 
