@@ -61,11 +61,20 @@ export const sendMessage = async (req, res) => {
 		// this will run in parallel
 		await Promise.all([conversation.save(), newMessage.save()]);
 
+		// Конвертируем mongoose объект в plain object для socket.io
+		const messageToEmit = newMessage.toObject ? newMessage.toObject() : newMessage;
+		
 		// SOCKET IO FUNCTIONALITY WILL GO HERE
-		const receiverSocketId = getReceiverSocketId(receiverId);
+		const receiverSocketId = getReceiverSocketId(receiverId.toString());
 		if (receiverSocketId) {
 			// io.to(<socket_id>).emit() used to send events to specific client
-			io.to(receiverSocketId).emit("newMessage", newMessage);
+			io.to(receiverSocketId).emit("newMessage", messageToEmit);
+		}
+
+		// Также отправляем отправителю через socket, если он онлайн
+		const senderSocketId = getReceiverSocketId(senderId.toString());
+		if (senderSocketId) {
+			io.to(senderSocketId).emit("newMessage", messageToEmit);
 		}
 
 		res.status(201).json(newMessage);

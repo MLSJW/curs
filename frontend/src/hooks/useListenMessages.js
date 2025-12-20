@@ -14,8 +14,12 @@ const useListenMessages = () => {
 
 	useEffect(() => {
 		socket?.on("newMessage", async (newMessage) => {
+			// Определяем тип сообщения (по умолчанию "text")
+			const msgType = newMessage.type || "text";
+			
 			// Аудио и изображения не шифруются, просто добавляем как есть
-			if (newMessage.type === "audio" || newMessage.type === "image") {
+			if (msgType === "audio" || msgType === "image") {
+				newMessage.type = msgType;
 				newMessage.shouldShake = true;
 				const sound = new Audio(notificationSound);
 				try {
@@ -55,6 +59,7 @@ const useListenMessages = () => {
 			} else {
 				message = "Missing private key";
 			}
+			newMessage.type = msgType;
 			newMessage.message = message;
 			newMessage.shouldShake = true;
 			const sound = new Audio(notificationSound);

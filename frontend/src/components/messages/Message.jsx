@@ -15,7 +15,9 @@ const Message = ({ message }) => {
 	const shakeClass = message.shouldShake ? "shake" : "";
 
 	const renderMessageContent = () => {
-		if (message.type === "image" && message.fileUrl) {
+		const msgType = message.type || "text";
+		
+		if (msgType === "image" && message.fileUrl) {
 			return (
 				<img
 					src={message.fileUrl}
@@ -26,7 +28,7 @@ const Message = ({ message }) => {
 			);
 		}
 
-		if (message.type === "audio" && message.fileUrl) {
+		if (msgType === "audio" && message.fileUrl) {
 			return (
 				<audio controls className="w-full max-w-xs">
 					<source src={message.fileUrl} type="audio/webm" />
@@ -48,7 +50,7 @@ const Message = ({ message }) => {
 					<img alt='Tailwind CSS chat bubble component' src={profilePic} />
 				</div>
 			</div>
-			<div className={`chat-bubble text-white ${bubbleBgColor} ${shakeClass} pb-2 ${message.type === "image" || message.type === "audio" ? "bg-transparent p-0" : ""}`}>
+			<div className={`chat-bubble text-white ${bubbleBgColor} ${shakeClass} pb-2 ${(message.type === "image" || message.type === "audio") ? "bg-transparent p-0" : ""}`}>
 				{renderMessageContent()}
 			</div>
 			<div className='chat-footer opacity-50 text-xs flex gap-1 items-center'>{formattedTime}</div>

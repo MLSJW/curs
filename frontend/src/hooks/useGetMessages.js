@@ -20,14 +20,21 @@ const useGetMessages = () => {
 				if (data.error) throw new Error(data.error);
 				if (!Array.isArray(data)) throw new Error("Invalid messages payload (expected array)");
 
-				const privateKeyObj = await importPrivateKey(privateKey);
 				const decryptedMessages = await Promise.all(data.map(async (msg) => {
+					// Определяем тип сообщения (по умолчанию "text")
+					const msgType = msg.type || "text";
+					
 					// Аудио и изображения не шифруются, просто возвращаем как есть
-					if (msg.type === "audio" || msg.type === "image") {
-						return msg;
+					if (msgType === "audio" || msgType === "image") {
+						return { ...msg, type: msgType };
 					}
 
 					// Текстовые сообщения требуют расшифровки
+					if (!privateKey) {
+						return { ...msg, type: msgType, message: "Missing private key" };
+					}
+
+					const privateKeyObj = await importPrivateKey(privateKey);
 					let message;
 					try {
 						// if I am sender -> use encryptedKeySender; else use encryptedKey
@@ -37,7 +44,7 @@ const useGetMessages = () => {
 							message = isSender
 								? "[Не удаётся расшифровать: сообщение отправлено до обновления]"
 								: "[Не удаётся расшифровать: отсутствует ключ]";
-							return { ...msg, message };
+							return { ...msg, type: msgType, message };
 						}
 						const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
 						const aesKey = await importAESKey(decryptedKey);
@@ -47,7 +54,7 @@ const useGetMessages = () => {
 						console.error("Decrypt error:", error);
 						message = "Error decrypting message";
 					}
-					return { ...msg, message };
+					return { ...msg, type: msgType, message };
 				}));
 				setMessages(decryptedMessages);
 			} catch (error) {
