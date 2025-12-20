@@ -41,10 +41,25 @@ const useGetConversations = () => {
 			});
 		};
 
+		const onConversationDeleted = ({ conversationId }) => {
+			setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+		};
+
+		const onMessagesRead = ({ conversationId, userId }) => {
+			// If someone read messages in a conversation, set unreadCount to 0 for that conversation
+			setConversations((prev) => prev.map((c) => (c._id === conversationId ? { ...c, unreadCount: 0 } : c)));
+		};
+
 		socket.on("newConversation", onNewConversation);
-		return () => socket.off("newConversation", onNewConversation);
+		socket.on("conversationDeleted", onConversationDeleted);
+		socket.on("messagesRead", onMessagesRead);
+		return () => {
+			socket.off("newConversation", onNewConversation);
+			socket.off("conversationDeleted", onConversationDeleted);
+			socket.off("messagesRead", onMessagesRead);
+		};
 	}, [socket]);
 
-	return { loading, conversations };
+	return { loading, conversations, setConversations };
 };
 export default useGetConversations;

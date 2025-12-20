@@ -1,13 +1,19 @@
 import { useSocketContext } from "../../context/SocketContext";
+import { useAuthContext } from "../../context/AuthContext";
 import useConversation from "../../zustand/useConversation";
 
-const Conversation = ({ conversation, lastIdx, emoji }) => {
+const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 	const { selectedConversation, setSelectedConversation } = useConversation();
 
 	const participant = conversation.participant;
 	const isSelected = selectedConversation?.participant?._id === conversation.participant._id;
 	const { onlineUsers } = useSocketContext();
 	const isOnline = onlineUsers.includes(participant._id);
+
+	const lastMsg = conversation.lastMessage;
+	const { authUser } = useAuthContext();
+	const isLastMsgSentByMe = lastMsg && lastMsg.senderId === authUser?._id;
+	const isLastMsgRead = lastMsg && Array.isArray(lastMsg.readBy) && lastMsg.readBy.includes(conversation.participant._id);
 
 	return (
 		<>
@@ -26,8 +32,25 @@ const Conversation = ({ conversation, lastIdx, emoji }) => {
 				<div className='flex flex-col flex-1'>
 					<div className='flex gap-3 justify-between'>
 						<p className='font-bold text-gray-200'>{participant.fullName}</p>
-						<span className='text-xl'>{emoji}</span>
+						<div className='flex items-center gap-2'>
+							{conversation.unreadCount > 0 && (
+								<span className='badge badge-error'>{conversation.unreadCount}</span>
+							)}
+							<span className='text-xl'>{emoji}</span>
+						</div>
 					</div>
+					{lastMsg && (
+						<p className='text-sm text-gray-400 truncate'>
+							{lastMsg.type === 'text' ? (lastMsg.message || 'Message') : (lastMsg.type === 'audio' ? 'Voice message' : 'Image')}
+						</p>
+					)}
+					{isLastMsgSentByMe && (
+						<div className='text-xs text-green-300'>{isLastMsgRead ? 'Прочитано' : 'Отправлено'}</div>
+					)}
+				</div>
+
+				<div className='flex items-center gap-2'>
+					<button className='btn btn-ghost btn-sm text-red-400' onClick={(e) => { e.stopPropagation(); onDelete?.(); }}>Удалить</button>
 				</div>
 			</div>
 

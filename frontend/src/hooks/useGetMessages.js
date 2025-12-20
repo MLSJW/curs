@@ -57,6 +57,16 @@ const useGetMessages = () => {
 					return { ...msg, type: msgType, message };
 				}));
 				setMessages(decryptedMessages);
+
+				// mark messages as read on server for this conversation
+				try {
+					await fetch(`/api/messages/conversations/${selectedConversation._id}/read`, {
+						method: "POST",
+						credentials: "include",
+					});
+				} catch (err) {
+					console.error("Error marking conversation read:", err);
+				}
 			} catch (error) {
 				toast.error(error.message);
 			} finally {

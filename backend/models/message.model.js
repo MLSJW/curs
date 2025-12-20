@@ -38,6 +38,13 @@ const messageSchema = new mongoose.Schema(
 			type: String,
 			required: false,
 		},
+		// Users who read this message
+		readBy: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+			},
+		],
 		// createdAt, updatedAt
 	},
 	{ timestamps: true }

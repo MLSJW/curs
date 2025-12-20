@@ -1,17 +1,51 @@
 import useGetConversations from "../../hooks/useGetConversations";
 import { getRandomEmoji } from "../../utils/emojis";
 import Conversation from "./Conversation";
+import { useState } from "react";
 
 const Conversations = () => {
-	const { loading, conversations } = useGetConversations();
+	const { loading, conversations, setConversations } = useGetConversations();
+
+	const handleDelete = async (conversationId) => {
+		try {
+			const res = await fetch(`/api/messages/conversations/${conversationId}`, { method: 'DELETE', credentials: 'include' });
+			const data = await res.json();
+			if (data.error) throw new Error(data.error);
+			setConversations((prev) => prev.filter((c) => c._id !== conversationId));
+		} catch (err) {
+			console.error('Delete conversation error', err);
+		}
+	};
+	const [filter, setFilter] = useState("");
+
+	const filtered = Array.isArray(conversations)
+		? conversations.filter(c => {
+			const name = c.participant?.fullName || "";
+			const username = c.participant?.username || "";
+			const q = filter.trim().toLowerCase();
+			if (!q) return true;
+			return name.toLowerCase().includes(q) || username.toLowerCase().includes(q);
+		})
+		: [];
+
 	return (
 		<div className='py-2 flex flex-col overflow-auto'>
-			{Array.isArray(conversations) && conversations.map((conversation, idx) => (
+			<div className='px-2 pb-2'>
+				<input
+					className='input input-sm w-full input-bordered'
+					placeholder='Поиск по чатам'
+					value={filter}
+					onChange={(e) => setFilter(e.target.value)}
+				/>
+			</div>
+
+			{filtered.map((conversation, idx) => (
 				<Conversation
 					key={conversation._id}
 					conversation={conversation}
 					emoji={getRandomEmoji()}
-					lastIdx={idx === conversations.length - 1}
+					lastIdx={idx === filtered.length - 1}
+					onDelete={() => handleDelete(conversation._id)}
 				/>
 			))}
 

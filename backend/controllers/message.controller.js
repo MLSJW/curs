@@ -122,6 +122,65 @@ export const getMessages = async (req, res) => {
 	}
 };
 
+export const markConversationRead = async (req, res) => {
+	try {
+		const { id: conversationId } = req.params;
+		const userId = req.user._id;
+
+		const conversation = await Conversation.findById(conversationId);
+		if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
+		if (!conversation.participants.map(p => p.toString()).includes(userId.toString())) {
+			return res.status(403).json({ error: 'Not a participant' });
+		}
+
+		const update = await Message.updateMany(
+			{ _id: { $in: conversation.messages }, receiverId: userId, readBy: { $nin: [userId] } },
+			{ $push: { readBy: userId } }
+		);
+
+		// emit read receipt to both participants so both clients update unread counts
+		const participantIds = conversation.participants.map(p => p.toString());
+		participantIds.forEach(pid => {
+			const sockId = getReceiverSocketId(pid);
+			if (sockId) io.to(sockId).emit('messagesRead', { conversationId, userId: userId.toString() });
+		});
+
+		res.status(200).json({ modifiedCount: update.modifiedCount || update.nModified || 0 });
+	} catch (error) {
+		console.error('Error in markConversationRead:', error.message);
+		res.status(500).json({ error: 'Internal server error' });
+	}
+};
+
+export const deleteConversation = async (req, res) => {
+	try {
+		const { id: conversationId } = req.params;
+		const userId = req.user._id;
+
+		const conversation = await Conversation.findById(conversationId);
+		if (!conversation) return res.status(404).json({ error: 'Conversation not found' });
+		if (!conversation.participants.map(p => p.toString()).includes(userId.toString())) {
+			return res.status(403).json({ error: 'Not a participant' });
+		}
+
+		// delete messages
+		await Message.deleteMany({ _id: { $in: conversation.messages } });
+		await conversation.remove();
+
+		// notify other participant
+		const otherParticipantId = conversation.participants.find(p => p.toString() !== userId.toString());
+		const otherSocketId = getReceiverSocketId(otherParticipantId.toString());
+		if (otherSocketId) {
+			io.to(otherSocketId).emit('conversationDeleted', { conversationId });
+		}
+
+		res.status(200).json({ success: true });
+	} catch (error) {
+		console.error('Error in deleteConversation:', error.message);
+		res.status(500).json({ error: 'Internal server error' });
+	}
+};
+
 export const getConversations = async (req, res) => {
 	try {
 		const userId = req.user._id;
@@ -133,14 +192,24 @@ export const getConversations = async (req, res) => {
 			options: { sort: { createdAt: -1 }, limit: 1 }, // Последнее сообщение
 		});
 
-		// Форматируем для frontend: для каждого conversation вернуть другого участника
-		const formattedConversations = conversations.map((conv) => {
+		// Форматируем для frontend: для каждого conversation вернуть другого участника + unread count
+		const formattedConversations = await Promise.all(conversations.map(async (conv) => {
 			const otherParticipant = conv.participants.find((p) => p._id.toString() !== userId.toString());
+			// count unread messages for current user
+			const unreadCount = await Message.countDocuments({ _id: { $in: conv.messages }, receiverId: userId, readBy: { $nin: [userId] } });
 			return {
 				_id: conv._id,
 				participant: otherParticipant,
 				lastMessage: conv.messages[0] || null,
+				unreadCount,
 			};
+		}));
+
+		// sort by lastMessage createdAt desc (put most recent on top)
+		formattedConversations.sort((a, b) => {
+			const ta = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+			const tb = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+			return tb - ta;
 		});
 
 		res.status(200).json(formattedConversations);
