@@ -30,8 +30,23 @@ app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/users", userRoutes);
 
-// Статические файлы для загруженных изображений и аудио
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Статические файлы для загруженных изображений и аудио (ВАЖНО: до frontend static)
+// Путь: backend/uploads (от корня проекта)
+app.use("/uploads", express.static(path.join(__dirname, "backend", "uploads"), {
+	setHeaders: (res, filePath) => {
+		// Устанавливаем правильные заголовки для аудио/видео файлов
+		if (filePath.endsWith('.webm')) {
+			res.setHeader('Content-Type', 'audio/webm');
+		} else if (filePath.endsWith('.ogg')) {
+			res.setHeader('Content-Type', 'audio/ogg');
+		} else if (filePath.endsWith('.mp3')) {
+			res.setHeader('Content-Type', 'audio/mpeg');
+		} else if (filePath.endsWith('.wav')) {
+			res.setHeader('Content-Type', 'audio/wav');
+		}
+		res.setHeader('Accept-Ranges', 'bytes');
+	}
+}));
 
 app.use(express.static(path.join(__dirname, "/frontend/dist")));
 

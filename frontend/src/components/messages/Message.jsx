@@ -24,18 +24,37 @@ const Message = ({ message }) => {
 					alt="Sent image"
 					className="max-w-xs rounded-lg cursor-pointer"
 					onClick={() => window.open(message.fileUrl, "_blank")}
+					onError={(e) => {
+						console.error("Image load error:", message.fileUrl);
+						e.target.style.display = "none";
+					}}
 				/>
 			);
 		}
 
 		if (msgType === "audio" && message.fileUrl) {
+			console.log("Rendering audio message:", { type: msgType, fileUrl: message.fileUrl });
 			return (
-				<audio controls className="w-full max-w-xs">
-					<source src={message.fileUrl} type="audio/webm" />
-					<source src={message.fileUrl} type="audio/mpeg" />
-					<source src={message.fileUrl} type="audio/wav" />
-					Ваш браузер не поддерживает аудио элемент.
-				</audio>
+				<div>
+					<audio 
+						controls 
+						className="w-full max-w-xs"
+						onError={(e) => {
+							console.error("Audio load error:", message.fileUrl, e);
+						}}
+						onLoadStart={() => {
+							console.log("Audio loading:", message.fileUrl);
+						}}
+					>
+						<source src={message.fileUrl} type="audio/webm" />
+						<source src={message.fileUrl} type="audio/ogg" />
+						<source src={message.fileUrl} type="audio/mpeg" />
+						<source src={message.fileUrl} type="audio/wav" />
+						Ваш браузер не поддерживает аудио элемент.
+					</audio>
+					{/* Debug info - удалить после проверки */}
+					<div className="text-xs text-gray-400 mt-1">URL: {message.fileUrl}</div>
+				</div>
 			);
 		}
 
