@@ -74,11 +74,17 @@ const Settings = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-gray-800 p-6 rounded-xl shadow-xl text-white">
-      <h2 className="text-2xl font-bold mb-6">Профиль</h2>
+    <div className="max-w-lg mx-auto bg-gray-800 p-6 rounded-xl shadow-xl text-white relative"> {/* Added relative for positioning */}
+      <button 
+        onClick={() => navigate("/")} 
+        className="absolute top-3 right-3 text-white hover:text-gray-400 text-3xl font-bold"
+      >
+        &times;
+      </button>
+      <h2 className="text-2xl font-bold mb-6 text-center">Профиль</h2>
       
       {/* Аватар */}
-      <div className="flex justify-center mb-6">
+      {/* <div className="flex justify-center mb-6">
         {authUser?.profilePic || profilePic ? (
           <img 
             src={profilePic ? URL.createObjectURL(profilePic) : authUser?.profilePic} 
@@ -90,33 +96,22 @@ const Settings = () => {
             <span className="text-gray-400">Нет аватара</span>
           </div>
         )}
-      </div>
+      </div> */}
       
       {error && <div className="bg-red-600 p-2 mb-2 rounded">{error}</div>}
       <form onSubmit={handleSave}>
         {/* Имя и фамилия - только поле ввода без надписи */}
-        <div className="mb-4">
-          <input type="text" className="w-full p-2 rounded bg-gray-700 border-0" name="fullName" value={form.fullName} onChange={handleChange} required placeholder="Имя и фамилия" />
+        <div className="mb-4 text-center">
+          <p className="w-full p-2 rounded bg-gray-700 border-0 text-white">{form.fullName || authUser?.fullName}</p>
         </div>
         
-        {/* Username - отображение и поле ввода */}
-        <div className="mb-4">
-          <div className="mb-3">
-            <p className="text-lg font-semibold">{form.username || authUser?.username}</p>
-            <p className="text-sm text-gray-400">@{form.username || authUser?.username}</p>
-          </div>
-          <input 
-            type="text" 
-            className="w-full p-2 rounded bg-gray-700" 
-            name="username" 
-            value={form.username} 
-            onChange={handleChange} 
-            required 
-            placeholder="Username"
-          />
+        {/* Username - отображение */}
+        <div className="mb-4 text-center">
+          <p className="text-sm text-gray-400">@{form.username || authUser?.username}</p>
+          <p className="text-lg font-semibold">Username</p>
         </div>
         
-        <div className="mb-4">
+        {/* <div className="mb-4">
           <label className="block mb-2">Новый пароль:</label>
           <input type="password" className="w-full p-2 rounded bg-gray-700" name="password" value={form.password} onChange={handleChange} />
         </div>
@@ -128,7 +123,7 @@ const Settings = () => {
           <label className="block mb-2">Изменить аватар:</label>
           <input type="file" accept="image/*" onChange={handleFileChange} className="w-full p-2 bg-gray-700 rounded" />
         </div>
-        <button type="submit" className="w-full p-2 bg-blue-600 rounded hover:bg-blue-700 mt-2" disabled={loading}>{loading ? "Сохраняю..." : "Сохранить изменения"}</button>
+        <button type="submit" className="w-full p-2 bg-blue-600 rounded hover:bg-blue-700 mt-2" disabled={loading}>{loading ? "Сохраняю..." : "Сохранить изменения"}</button> */}
       </form>
       <button onClick={handleDelete} className="w-full p-2 bg-red-600 rounded hover:bg-red-700 mt-4" disabled={loading}>{loading ? "Удаление..." : "Удалить аккаунт"}</button>
     </div>
@@ -136,4 +131,3 @@ const Settings = () => {
 };
 
 export default Settings;
-
