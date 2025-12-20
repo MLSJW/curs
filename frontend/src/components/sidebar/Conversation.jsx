@@ -1,11 +1,13 @@
 import { useSocketContext } from "../../context/SocketContext";
 import { useAuthContext } from "../../context/AuthContext";
 import useConversation from "../../zustand/useConversation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { decryptMessage, importPrivateKey, importAESKey, decryptAES } from "../../utils/crypto";
 
 const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 	const { selectedConversation, setSelectedConversation } = useConversation();
 	const [showDelete, setShowDelete] = useState(false);
+	const [preview, setPreview] = useState('');
 
 	const participant = conversation.participant;
 	const isSelected = selectedConversation?.participant?._id === conversation.participant._id;
@@ -16,6 +18,32 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 	const { authUser } = useAuthContext();
 	const isLastMsgSentByMe = lastMsg && lastMsg.senderId === authUser?._id;
 	const isLastMsgRead = lastMsg && Array.isArray(lastMsg.readBy) && lastMsg.readBy.includes(conversation.participant._id);
+
+	useEffect(() => {
+		if (lastMsg && lastMsg.type === 'text' && authUser?.privateKey) {
+			const decrypt = async () => {
+				try {
+					const privateKeyObj = await importPrivateKey(authUser.privateKey);
+					const isSender = lastMsg.senderId === authUser._id;
+					const keyToUse = isSender ? lastMsg.encryptedKeySender : lastMsg.encryptedKey;
+					if (!keyToUse) {
+						setPreview('Не удаётся расшифровать');
+						return;
+					}
+					const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
+					const aesKey = await importAESKey(decryptedKey);
+					const encryptedData = JSON.parse(lastMsg.message);
+					const message = await decryptAES(encryptedData, aesKey);
+					setPreview(message);
+				} catch (error) {
+					setPreview('Ошибка расшифровки');
+				}
+			};
+			decrypt();
+		} else if (lastMsg) {
+			setPreview(lastMsg.type === 'audio' ? 'Голосовое' : 'Изображение');
+		}
+	}, [lastMsg, authUser]);
 
 	return (
 		<>
@@ -46,7 +74,7 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 					</div>
 					{lastMsg && (
 						<p className='text-sm text-gray-400 truncate'>
-							{lastMsg.type === 'text' ? 'Текст' : (lastMsg.type === 'audio' ? 'Голосовое' : 'Изображение')}
+							{preview}
 						</p>
 					)}
 					{isLastMsgSentByMe && (
