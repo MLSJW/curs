@@ -27,7 +27,10 @@ const useListenMessages = () => {
 				} catch {
 					// ignore autoplay policy errors
 				}
-				setMessages((prev) => [...prev, newMessage]);
+				setMessages((prev) => {
+					if (prev.some((m) => m._id === newMessage._id)) return prev;
+					return [...prev, newMessage];
+				});
 				return;
 			}
 
@@ -45,7 +48,10 @@ const useListenMessages = () => {
 							: "[Не удаётся расшифровать: отсутствует ключ]";
 						newMessage.message = message;
 						newMessage.shouldShake = true;
-						setMessages((prev) => [...prev, newMessage]);
+						setMessages((prev) => {
+							if (prev.some((m) => m._id === newMessage._id)) return prev;
+							return [...prev, newMessage];
+						});
 						return;
 					}
 					const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
@@ -68,7 +74,10 @@ const useListenMessages = () => {
 			} catch {
 				// ignore autoplay policy errors
 			}
-			setMessages((prev) => [...prev, newMessage]);
+			setMessages((prev) => {
+				if (prev.some((m) => m._id === newMessage._id)) return prev;
+				return [...prev, newMessage];
+			});
 		});
 
 		return () => socket?.off("newMessage");

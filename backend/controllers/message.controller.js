@@ -38,10 +38,12 @@ export const sendMessage = async (req, res) => {
 			participants: { $all: [senderId, receiverId] },
 		});
 
+		let isNewConversation = false;
 		if (!conversation) {
 			conversation = await Conversation.create({
 				participants: [senderId, receiverId],
 			});
+			isNewConversation = true;
 		}
 
 		const newMessage = new Message({
@@ -75,6 +77,22 @@ export const sendMessage = async (req, res) => {
 		const senderSocketId = getReceiverSocketId(senderId.toString());
 		if (senderSocketId) {
 			io.to(senderSocketId).emit("newMessage", messageToEmit);
+		}
+
+		// If a new conversation was created, notify both participants so UI can update conversations list
+		if (isNewConversation) {
+			try {
+				const otherParticipant = await User.findById(receiverId).select("fullName username profilePic publicKey");
+				const formattedConversation = {
+					_id: conversation._id,
+					participant: otherParticipant,
+					lastMessage: messageToEmit,
+				};
+				if (receiverSocketId) io.to(receiverSocketId).emit("newConversation", formattedConversation);
+				if (senderSocketId) io.to(senderSocketId).emit("newConversation", formattedConversation);
+			} catch (err) {
+				console.error("Error emitting newConversation:", err.message);
+			}
 		}
 
 		res.status(201).json(newMessage);
