@@ -48,8 +48,10 @@ const useGetConversations = () => {
 		};
 
 		const onMessagesRead = ({ conversationId, userId }) => {
-			// If someone read messages in a conversation, set unreadCount to 0 for that conversation
-			setConversations((prev) => prev.map((c) => (c._id === conversationId ? { ...c, unreadCount: 0 } : c)));
+			// If the current user read messages in a conversation, set unreadCount to 0 for that conversation
+			if (userId === authUser._id) {
+				setConversations((prev) => prev.map((c) => (c._id === conversationId ? { ...c, unreadCount: 0 } : c)));
+			}
 		};
 
 		const onNewMessage = (newMessage) => {

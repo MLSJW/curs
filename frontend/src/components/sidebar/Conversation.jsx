@@ -2,9 +2,8 @@ import { useSocketContext } from "../../context/SocketContext";
 import { useAuthContext } from "../../context/AuthContext";
 import useConversation from "../../zustand/useConversation";
 import { useState, useEffect } from "react";
-import { decryptMessage, importPrivateKey, importAESKey, decryptAES } from "../../utils/crypto";
 
-const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
+const Conversation = ({ conversation, lastIdx, onDelete }) => {
 	const { selectedConversation, setSelectedConversation } = useConversation();
 	const [showDelete, setShowDelete] = useState(false);
 	const [preview, setPreview] = useState('');
@@ -20,30 +19,10 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 	const isLastMsgRead = lastMsg && Array.isArray(lastMsg.readBy) && lastMsg.readBy.includes(conversation.participant._id);
 
 	useEffect(() => {
-		if (lastMsg && lastMsg.type === 'text' && authUser?.privateKey) {
-			const decrypt = async () => {
-				try {
-					const privateKeyObj = await importPrivateKey(authUser.privateKey);
-					const isSender = lastMsg.senderId === authUser._id;
-					const keyToUse = isSender ? lastMsg.encryptedKeySender : lastMsg.encryptedKey;
-					if (!keyToUse) {
-						setPreview('Текст');
-						return;
-					}
-					const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
-					const aesKey = await importAESKey(decryptedKey);
-					const encryptedData = JSON.parse(lastMsg.message);
-					const message = await decryptAES(encryptedData, aesKey);
-					setPreview(message);
-				} catch (error) {
-					setPreview('Текст');
-				}
-			};
-			decrypt();
-		} else if (lastMsg) {
-			setPreview(lastMsg.type === 'audio' ? 'Голосовое' : lastMsg.type === 'image' ? 'Изображение' : 'Текст');
+		if (lastMsg) {
+			setPreview(lastMsg.type === 'audio' ? 'Голосовое' : lastMsg.type === 'image' ? 'Изображение' : 'Сообщение');
 		}
-	}, [lastMsg, authUser]);
+	}, [lastMsg]);
 
 	return (
 		<>

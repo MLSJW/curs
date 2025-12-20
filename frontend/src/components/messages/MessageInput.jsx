@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { BsSend, BsImage } from "react-icons/bs";
+import { BsSend, BsImage, BsEmojiSmile } from "react-icons/bs";
 import useSendMessage from "../../hooks/useSendMessage";
 import AudioRecorder from "./AudioRecorder";
 
@@ -7,6 +7,7 @@ const MessageInput = () => {
 	const [message, setMessage] = useState("");
 	const [audioBlob, setAudioBlob] = useState(null);
 	const [selectedImage, setSelectedImage] = useState(null);
+	const [showEmoji, setShowEmoji] = useState(false);
 	const fileInputRef = useRef(null);
 	const { loading, sendMessage, sendAudioMessage, sendImageMessage } = useSendMessage();
 
@@ -85,6 +86,15 @@ const MessageInput = () => {
 					<BsImage className="w-5 h-5" />
 				</button>
 				
+				<button
+					type='button'
+					onClick={() => setShowEmoji(!showEmoji)}
+					className='p-2 text-blue-500 hover:bg-gray-600 rounded-full transition-colors'
+					title='Добавить эмодзи'
+				>
+					<BsEmojiSmile className="w-5 h-5" />
+				</button>
+				
 				{!audioBlob ? (
 					<AudioRecorder
 						onRecordingComplete={handleRecordingComplete}
@@ -119,6 +129,20 @@ const MessageInput = () => {
 					{loading ? <div className='loading loading-spinner loading-sm'></div> : <BsSend className="w-5 h-5" />}
 				</button>
 			</div>
+			
+			{showEmoji && (
+				<div className='absolute bottom-full mb-2 bg-gray-700 p-2 rounded flex flex-wrap gap-1 max-w-xs'>
+					{['😀', '😂', '😍', '👍', '❤️', '😢', '😡', '🎉', '🔥', '💯'].map(emoji => (
+						<button 
+							key={emoji} 
+							onClick={() => { setMessage(prev => prev + emoji); setShowEmoji(false); }} 
+							className='text-2xl p-1 hover:bg-gray-600 rounded'
+						>
+							{emoji}
+						</button>
+					))}
+				</div>
+			)}
 		</form>
 	);
 };

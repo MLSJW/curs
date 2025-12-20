@@ -1,5 +1,4 @@
 import useGetConversations from "../../hooks/useGetConversations";
-import { getRandomEmoji } from "../../utils/emojis";
 import Conversation from "./Conversation";
 import { useState } from "react";
 
@@ -43,7 +42,6 @@ const Conversations = () => {
 				<Conversation
 					key={conversation._id}
 					conversation={conversation}
-					emoji={getRandomEmoji()}
 					lastIdx={idx === filtered.length - 1}
 					onDelete={() => handleDelete(conversation._id)}
 				/>
