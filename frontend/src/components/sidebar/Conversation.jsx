@@ -89,11 +89,6 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 				)}
 			</div>
 
-				<div className='flex items-center gap-2'>
-					<button className='btn btn-ghost btn-sm text-red-400' onClick={(e) => { e.stopPropagation(); onDelete?.(); }}>Удалить</button>
-				</div>
-			</div>
-
 			{!lastIdx && <div className='divider my-0 py-0 h-1' />}
 		</>
 	);
