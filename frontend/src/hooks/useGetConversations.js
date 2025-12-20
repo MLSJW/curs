@@ -33,7 +33,7 @@ const useGetConversations = () => {
 	}, []);
 
 	useEffect(() => {
-		if (!socket) return;
+		if (!socket || !authUser) return;
 
 		const onNewConversation = (conversation) => {
 			setConversations((prev) => {
