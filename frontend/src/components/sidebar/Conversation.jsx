@@ -1,9 +1,11 @@
 import { useSocketContext } from "../../context/SocketContext";
 import { useAuthContext } from "../../context/AuthContext";
 import useConversation from "../../zustand/useConversation";
+import { useState } from "react";
 
 const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 	const { selectedConversation, setSelectedConversation } = useConversation();
+	const [showDelete, setShowDelete] = useState(false);
 
 	const participant = conversation.participant;
 	const isSelected = selectedConversation?.participant?._id === conversation.participant._id;
@@ -21,7 +23,10 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 				className={`flex gap-2 items-center hover:bg-sky-500 rounded p-2 py-1 cursor-pointer
 				${isSelected ? "bg-sky-500" : ""}
 			`}
-				onClick={() => setSelectedConversation({ ...conversation, participant })}
+				onClick={() => {
+					setSelectedConversation({ ...conversation, participant });
+					setShowDelete(!showDelete);
+				}}
 			>
 				<div className={`avatar ${isOnline ? "online" : ""}`}>
 					<div className='w-12 rounded-full'>
@@ -39,6 +44,7 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 							<span className='text-xl'>{emoji}</span>
 						</div>
 					</div>
+					<p className='text-xs text-gray-500 truncate'>{participant.publicKey}</p>
 					{lastMsg && (
 						<p className='text-sm text-gray-400 truncate'>
 							{lastMsg.type === 'text' ? (lastMsg.message || 'Message') : (lastMsg.type === 'audio' ? 'Voice message' : 'Image')}
@@ -48,6 +54,13 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 						<div className='text-xs text-green-300'>{isLastMsgRead ? 'Прочитано' : 'Отправлено'}</div>
 					)}
 				</div>
+
+				{showDelete && (
+					<div className='flex items-center gap-2'>
+						<button className='btn btn-ghost btn-sm text-red-400' onClick={(e) => { e.stopPropagation(); onDelete?.(); }}>Удалить</button>
+					</div>
+				)}
+			</div>
 
 				<div className='flex items-center gap-2'>
 					<button className='btn btn-ghost btn-sm text-red-400' onClick={(e) => { e.stopPropagation(); onDelete?.(); }}>Удалить</button>
