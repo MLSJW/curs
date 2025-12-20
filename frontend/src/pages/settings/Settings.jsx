@@ -74,7 +74,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-gray-800 py-12 px-6 rounded-xl shadow-xl text-white relative min-h-[700px]"> {/* Added relative for positioning */}
+    <div className="max-w-lg mx-auto bg-gray-800 p-6 rounded-xl shadow-xl text-white relative">
       <button 
         onClick={() => navigate("/")} 
         className="absolute top-3 right-3 text-white hover:text-gray-400 text-3xl font-bold"
@@ -84,7 +84,7 @@ const Settings = () => {
       <h2 className="text-2xl font-bold mb-6 text-center">Профиль</h2>
       
       {/* Аватар */}
-      {/* <div className="flex justify-center mb-6">
+      <div className="flex justify-center mb-6">
         {authUser?.profilePic || profilePic ? (
           <img 
             src={profilePic ? URL.createObjectURL(profilePic) : authUser?.profilePic} 
@@ -96,19 +96,20 @@ const Settings = () => {
             <span className="text-gray-400">Нет аватара</span>
           </div>
         )}
-      </div> */}
+      </div>
       
       {error && <div className="bg-red-600 p-2 mb-2 rounded">{error}</div>}
       <form onSubmit={handleSave}>
         {/* Имя и фамилия - только поле ввода без надписи */}
         <div className="mb-4 text-center">
-          <p className="w-full p-2 rounded bg-gray-700 border-0 text-lg font-semibold text-white">{form.fullName || authUser?.fullName}</p>
+          <p className="w-full p-2 rounded bg-gray-700 border-0 text-xl text-white">{form.fullName || authUser?.fullName}</p>
+          <p className="text-sm text-blue-400">В сети</p>
         </div>
         
         {/* Username - отображение */}
-        <div className="mb-4 text-center">
-          <p className="text-lg font-semibold">@{form.username || authUser?.username}</p>
-          <p className="text-sm text-gray-400">Username</p>
+        <div className="mb-4">
+          <p className="text-lg text-white">@{form.username || authUser?.username}</p>
+          <p className="text-sm text-gray-400">Имя пользователя</p>
         </div>
         
         {/* <div className="mb-4">
