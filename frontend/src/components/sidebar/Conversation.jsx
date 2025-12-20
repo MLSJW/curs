@@ -44,7 +44,6 @@ const Conversation = ({ conversation, lastIdx, emoji, onDelete }) => {
 							<span className='text-xl'>{emoji}</span>
 						</div>
 					</div>
-					<p className='text-xs text-gray-500 truncate'>{participant.publicKey}</p>
 					{lastMsg && (
 						<p className='text-sm text-gray-400 truncate'>
 							{lastMsg.type === 'text' ? (lastMsg.message || 'Message') : (lastMsg.type === 'audio' ? 'Voice message' : 'Image')}
