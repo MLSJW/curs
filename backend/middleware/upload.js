@@ -1,0 +1,49 @@
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Настройка хранилища
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		let uploadPath = "";
+		if (file.mimetype.startsWith("image/")) {
+			uploadPath = path.join(__dirname, "../uploads/images");
+		} else if (file.mimetype.startsWith("audio/")) {
+			uploadPath = path.join(__dirname, "../uploads/audio");
+		} else {
+			return cb(new Error("Неподдерживаемый тип файла"));
+		}
+		cb(null, uploadPath);
+	},
+	filename: function (req, file, cb) {
+		// Генерируем уникальное имя файла: timestamp-random-originalname
+		const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+		const ext = path.extname(file.originalname);
+		cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+	},
+});
+
+// Фильтр файлов
+const fileFilter = (req, file, cb) => {
+	if (file.mimetype.startsWith("image/")) {
+		cb(null, true);
+	} else if (file.mimetype.startsWith("audio/")) {
+		cb(null, true);
+	} else {
+		cb(new Error("Разрешены только изображения и аудио файлы"), false);
+	}
+};
+
+const upload = multer({
+	storage: storage,
+	limits: {
+		fileSize: 50 * 1024 * 1024, // 50MB максимум
+	},
+	fileFilter: fileFilter,
+});
+
+export default upload;
+

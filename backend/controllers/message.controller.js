@@ -23,9 +23,16 @@ const encryptMessage = (message, publicKeyPem) => {
 
 export const sendMessage = async (req, res) => {
 	try {
-		const { message, encryptedKey, encryptedKeySender } = req.body;
+		const { message, encryptedKey, encryptedKeySender, type } = req.body;
 		const { id: receiverId } = req.params;
 		const senderId = req.user._id;
+
+		// Получаем URL загруженного файла, если есть
+		let fileUrl = null;
+		const messageType = type || (req.file ? (req.file.mimetype.startsWith("image/") ? "image" : "audio") : "text");
+		if (req.file) {
+			fileUrl = `/uploads/${messageType === "image" ? "images" : "audio"}/${req.file.filename}`;
+		}
 
 		let conversation = await Conversation.findOne({
 			participants: { $all: [senderId, receiverId] },
@@ -40,17 +47,16 @@ export const sendMessage = async (req, res) => {
 		const newMessage = new Message({
 			senderId,
 			receiverId,
-			message,
-			encryptedKey,
-			encryptedKeySender,
+			message: messageType === "text" ? message : undefined,
+			type: messageType,
+			fileUrl: fileUrl || undefined,
+			encryptedKey: messageType === "text" ? (encryptedKey || undefined) : undefined,
+			encryptedKeySender: messageType === "text" ? (encryptedKeySender || undefined) : undefined,
 		});
 
 		if (newMessage) {
 			conversation.messages.push(newMessage._id);
 		}
-
-		// await conversation.save();
-		// await newMessage.save();
 
 		// this will run in parallel
 		await Promise.all([conversation.save(), newMessage.save()]);

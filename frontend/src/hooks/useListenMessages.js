@@ -14,6 +14,20 @@ const useListenMessages = () => {
 
 	useEffect(() => {
 		socket?.on("newMessage", async (newMessage) => {
+			// Аудио и изображения не шифруются, просто добавляем как есть
+			if (newMessage.type === "audio" || newMessage.type === "image") {
+				newMessage.shouldShake = true;
+				const sound = new Audio(notificationSound);
+				try {
+					await sound.play();
+				} catch {
+					// ignore autoplay policy errors
+				}
+				setMessages((prev) => [...prev, newMessage]);
+				return;
+			}
+
+			// Текстовые сообщения требуют расшифровки
 			let message;
 			if (privateKey) {
 				try {

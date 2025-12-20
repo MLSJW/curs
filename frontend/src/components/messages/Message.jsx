@@ -14,6 +14,33 @@ const Message = ({ message }) => {
 
 	const shakeClass = message.shouldShake ? "shake" : "";
 
+	const renderMessageContent = () => {
+		if (message.type === "image" && message.fileUrl) {
+			return (
+				<img
+					src={message.fileUrl}
+					alt="Sent image"
+					className="max-w-xs rounded-lg cursor-pointer"
+					onClick={() => window.open(message.fileUrl, "_blank")}
+				/>
+			);
+		}
+
+		if (message.type === "audio" && message.fileUrl) {
+			return (
+				<audio controls className="w-full max-w-xs">
+					<source src={message.fileUrl} type="audio/webm" />
+					<source src={message.fileUrl} type="audio/mpeg" />
+					<source src={message.fileUrl} type="audio/wav" />
+					Ваш браузер не поддерживает аудио элемент.
+				</audio>
+			);
+		}
+
+		// Текстовое сообщение (default или type === "text")
+		return <div>{message.message || ""}</div>;
+	};
+
 	return (
 		<div className={`chat ${chatClassName}`}>
 			<div className='chat-image avatar'>
@@ -21,7 +48,9 @@ const Message = ({ message }) => {
 					<img alt='Tailwind CSS chat bubble component' src={profilePic} />
 				</div>
 			</div>
-			<div className={`chat-bubble text-white ${bubbleBgColor} ${shakeClass} pb-2`}>{message.message}</div>
+			<div className={`chat-bubble text-white ${bubbleBgColor} ${shakeClass} pb-2 ${message.type === "image" || message.type === "audio" ? "bg-transparent p-0" : ""}`}>
+				{renderMessageContent()}
+			</div>
 			<div className='chat-footer opacity-50 text-xs flex gap-1 items-center'>{formattedTime}</div>
 		</div>
 	);

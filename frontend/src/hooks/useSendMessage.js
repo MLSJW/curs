@@ -40,6 +40,7 @@ const useSendMessage = () => {
 					message: JSON.stringify(encryptedData),
 					encryptedKey,
 					encryptedKeySender,
+					type: "text",
 				}),
 			});
 			const data = await res.json();
@@ -53,6 +54,58 @@ const useSendMessage = () => {
 		}
 	};
 
-	return { sendMessage, loading };
+	const sendAudioMessage = async (audioBlob) => {
+		setLoading(true);
+		try {
+			if (!selectedConversation?.participant?._id) throw new Error("Чат не выбран");
+
+			const formData = new FormData();
+			formData.append("file", audioBlob, "audio.webm");
+			formData.append("type", "audio");
+
+			const res = await fetch(`/api/messages/send/${selectedConversation.participant._id}`, {
+				method: "POST",
+				credentials: "include",
+				body: formData,
+			});
+			const data = await res.json();
+			if (data.error) throw new Error(data.error);
+
+			setMessages((prev) => [...prev, data]);
+			toast.success("Голосовое сообщение отправлено");
+		} catch (error) {
+			toast.error(error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const sendImageMessage = async (imageFile) => {
+		setLoading(true);
+		try {
+			if (!selectedConversation?.participant?._id) throw new Error("Чат не выбран");
+
+			const formData = new FormData();
+			formData.append("file", imageFile);
+			formData.append("type", "image");
+
+			const res = await fetch(`/api/messages/send/${selectedConversation.participant._id}`, {
+				method: "POST",
+				credentials: "include",
+				body: formData,
+			});
+			const data = await res.json();
+			if (data.error) throw new Error(data.error);
+
+			setMessages((prev) => [...prev, data]);
+			toast.success("Изображение отправлено");
+		} catch (error) {
+			toast.error(error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	return { sendMessage, sendAudioMessage, sendImageMessage, loading };
 };
 export default useSendMessage;

@@ -22,6 +22,12 @@ const useGetMessages = () => {
 
 				const privateKeyObj = await importPrivateKey(privateKey);
 				const decryptedMessages = await Promise.all(data.map(async (msg) => {
+					// Аудио и изображения не шифруются, просто возвращаем как есть
+					if (msg.type === "audio" || msg.type === "image") {
+						return msg;
+					}
+
+					// Текстовые сообщения требуют расшифровки
 					let message;
 					try {
 						// if I am sender -> use encryptedKeySender; else use encryptedKey
