@@ -112,19 +112,6 @@ const Settings = () => {
           <p className="text-sm text-gray-400">Имя пользователя</p>
         </div>
         
-        {/* <div className="mb-4">
-          <label className="block mb-2">Новый пароль:</label>
-          <input type="password" className="w-full p-2 rounded bg-gray-700" name="password" value={form.password} onChange={handleChange} />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-2">Подтвердите новый пароль:</label>
-          <input type="password" className="w-full p-2 rounded bg-gray-700" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} />
-        </div>
-        <div className="mb-4">
-          <label className="block mb-2">Изменить аватар:</label>
-          <input type="file" accept="image/*" onChange={handleFileChange} className="w-full p-2 bg-gray-700 rounded" />
-        </div>
-        <button type="submit" className="w-full p-2 bg-blue-600 rounded hover:bg-blue-700 mt-2" disabled={loading}>{loading ? "Сохраняю..." : "Сохранить изменения"}</button> */}
       </form>
       <button onClick={handleDelete} className="w-full p-2 bg-red-600 rounded hover:bg-red-700 mt-4" disabled={loading}>{loading ? "Удаление..." : "Удалить аккаунт"}</button>
     </div>

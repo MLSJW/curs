@@ -8,7 +8,8 @@ const Sidebar = () => {
 			<SearchInput />
 			<div className='divider px-3'></div>
 			<Conversations />
-			<a href='/settings' className='p-2 my-2 text-center bg-blue-700 rounded text-white hover:bg-blue-600 transition-colors'>Мой профиль</a>
+			<a href='/profile' className='p-2 my-2 text-center bg-blue-700 rounded text-white hover:bg-blue-600 transition-colors'>Мой профиль</a>
+				<a href='/profile/settings' className='p-2 my-2 text-center bg-blue-700 rounded text-white hover:bg-blue-600 transition-colors'>Настройки профиля</a>
 				<LogoutButton />
 		</div>
 	);
