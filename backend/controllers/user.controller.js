@@ -19,7 +19,7 @@ export async function getUsersForSidebar(req, res) {
 	}
 }
 
-// Удаление аккаунта
+
 export async function deleteMyAccount(req, res) {
 	try {
 		const userId = req.user._id;
@@ -32,18 +32,24 @@ export async function deleteMyAccount(req, res) {
 	}
 };
 
-// Обновление профиля (имя, username, пароль, аватар)
+
 export async function updateMyProfile(req, res) {
 	try {
 		const userId = req.user._id;
 		const { fullName, username, password } = req.body;
 		const profilePic = req.file ? `/uploads/images/${req.file.filename}` : undefined;
+		console.log("Обновление профиля для пользователя:", userId);
+		console.log("req.body:", req.body);
+		console.log("req.file:", req.file);
+		console.log("profilePic:", profilePic);
 		const update = {};
 		if (fullName) update.fullName = fullName;
 		if (username) update.username = username;
-		if (password) update.password = password; // хеширование обязано быть в pre-save hook
+		if (password) update.password = password; 
 		if (profilePic) update.profilePic = profilePic;
+		console.log("update object:", update);
 		const updated = await User.findByIdAndUpdate(userId, update, { new: true });
+		console.log("updated user:", updated);
 		res.json(updated);
 	} catch (error) {
 		console.error("Ошибка при обновлении профиля:", error.message);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../utils/api";
 
 const Settings = () => {
   const { authUser, setAuthUser } = useAuthContext();
@@ -39,9 +40,8 @@ const Settings = () => {
       if (form.password) formData.append("password", form.password);
       if (profilePic) formData.append("profilePic", profilePic);
 
-      const res = await fetch("/api/users/me", {
+      const res = await apiFetch("/api/users/me", {
         method: "PATCH",
-        credentials: "include",
         body: formData
       });
       const data = await res.json();
@@ -59,9 +59,8 @@ const Settings = () => {
     if (!window.confirm("Вы уверены, что хотите удалить аккаунт? Это действие необратимо!")) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/users/me", {
-        method: "DELETE",
-        credentials: "include"
+      const res = await apiFetch("/api/users/me", {
+        method: "DELETE"
       });
       const data = await res.json();
       if (!data.success) throw new Error("Ошибка при удалении аккаунта");

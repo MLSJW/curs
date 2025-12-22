@@ -1,6 +1,17 @@
 import CryptoJS from 'crypto-js';
 
-const SECRET_KEY = 'my-secret-key-123'; // В продакшене использовать безопасный ключ из .env
+// Функция для получения или генерации уникального ключа пользователя
+const getUserSecretKey = () => {
+  let key = localStorage.getItem('userSecretKey');
+  if (!key) {
+    // Генерируем случайный ключ, если его нет
+    key = CryptoJS.lib.WordArray.random(256/8).toString();
+    localStorage.setItem('userSecretKey', key);
+  }
+  return key;
+};
+
+const SECRET_KEY = getUserSecretKey();
 
 export const encryptMessage = (message) => {
     return CryptoJS.AES.encrypt(message, SECRET_KEY).toString();

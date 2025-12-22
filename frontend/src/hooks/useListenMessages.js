@@ -14,10 +14,8 @@ const useListenMessages = () => {
 
 	useEffect(() => {
 		socket?.on("newMessage", async (newMessage) => {
-			// Определяем тип сообщения (по умолчанию "text")
 			const msgType = newMessage.type || "text";
 			
-			// Аудио и изображения не шифруются, просто добавляем как есть
 			if (msgType === "audio" || msgType === "image") {
 				newMessage.type = msgType;
 				newMessage.shouldShake = true;
@@ -25,7 +23,6 @@ const useListenMessages = () => {
 				try {
 					await sound.play();
 				} catch {
-					// ignore autoplay policy errors
 				}
 				setMessages((prev) => {
 					if (prev.some((m) => m._id === newMessage._id)) return prev;
@@ -34,18 +31,16 @@ const useListenMessages = () => {
 				return;
 			}
 
-			// Текстовые сообщения требуют расшифровки
 			let message;
 			if (privateKey) {
 				try {
 					const privateKeyObj = await importPrivateKey(privateKey);
-					// if I am sender -> use encryptedKeySender; else use encryptedKey
 					const isSender = newMessage.senderId === authUser._id;
 					const keyToUse = isSender ? newMessage.encryptedKeySender : newMessage.encryptedKey;
 					if (!keyToUse) {
 						message = isSender
-							? "[Не удаётся расшифровать: сообщение отправлено до обновления]"
-							: "[Не удаётся расшифровать: отсутствует ключ]";
+							? "[Unable to decrypt: message sent before update]"
+							: "[Unable to decrypt: key missing]";
 						newMessage.message = message;
 						newMessage.shouldShake = true;
 						setMessages((prev) => {
@@ -72,7 +67,6 @@ const useListenMessages = () => {
 			try {
 				await sound.play();
 			} catch {
-				// ignore autoplay policy errors
 			}
 			setMessages((prev) => {
 				if (prev.some((m) => m._id === newMessage._id)) return prev;
@@ -80,7 +74,18 @@ const useListenMessages = () => {
 			});
 		});
 
-		return () => socket?.off("newMessage");
+		socket?.on("messagesRead", ({ conversationId, userId }) => {
+			setMessages((prev) =>
+				prev.map((msg) =>
+					msg.receiverId === userId ? { ...msg, readBy: [...(msg.readBy || []), userId] } : msg
+				)
+			);
+		});
+
+		return () => {
+			socket?.off("newMessage");
+			socket?.off("messagesRead");
+		};
 	}, [socket, setMessages, privateKey, authUser]);
 };
 export default useListenMessages;
