@@ -88,6 +88,7 @@ const ProfileSettings = () => {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setAuthUser(data);
+      localStorage.setItem("chat-user", JSON.stringify(data));
       setLoading(false);
       navigate("/profile");
     } catch (err) {
