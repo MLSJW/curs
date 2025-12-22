@@ -15,7 +15,7 @@ const ProfileSettings = () => {
     confirmPassword: ""
   });
   const [profilePic, setProfilePic] = useState(null);
-  const [crop, setCrop] = useState({ unit: '%', width: 50, aspect: 1 });
+  const [crop, setCrop] = useState({ unit: '%', width: 50, height: 50, x: 25, y: 25 });
   const [completedCrop, setCompletedCrop] = useState(null);
   const [imageRef, setImageRef] = useState(null);
   const [showCrop, setShowCrop] = useState(false);
@@ -152,7 +152,6 @@ const ProfileSettings = () => {
                 onChange={setCrop}
                 onComplete={setCompletedCrop}
                 onImageLoaded={(img) => setImageRef(img)}
-                circularCrop
               />
             </div>
           )}

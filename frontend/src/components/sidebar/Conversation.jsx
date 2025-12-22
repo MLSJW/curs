@@ -9,7 +9,9 @@ const Conversation = ({ conversation, lastIdx, onDelete }) => {
 	const [preview, setPreview] = useState('');
 
 	const participant = conversation.participant;
-	const isSelected = selectedConversation?.participant?._id === conversation.participant._id;
+	if (!participant) return null; // Prevent errors if participant is undefined
+
+	const isSelected = selectedConversation?.participant?._id === participant._id;
 	const { onlineUsers } = useSocketContext();
 	const isOnline = onlineUsers.includes(participant._id);
 
