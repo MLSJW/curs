@@ -4,9 +4,11 @@ import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 import { TiMessages } from "react-icons/ti";
 import { useAuthContext } from "../../context/AuthContext";
+import { useSocketContext } from "../../context/SocketContext";
 
 const MessageContainer = () => {
 	const { selectedConversation, setSelectedConversation } = useConversation();
+	const { onlineUsers } = useSocketContext();
 
 	useEffect(() => {
 		// cleanup function (unmounts)
@@ -23,6 +25,9 @@ const MessageContainer = () => {
 					<div className='bg-slate-500 px-4 py-2 mb-2'>
 						<span className='label-text'></span>{" "}
 						<span className='text-gray-900 font-bold'>{selectedConversation.participant.fullName}</span>
+						<span className={`text-sm ml-2 ${onlineUsers.includes(selectedConversation.participant._id) ? 'text-green-400' : 'text-gray-400'}`}>
+							{onlineUsers.includes(selectedConversation.participant._id) ? 'В сети' : 'Не в сети'}
+						</span>
 					</div>
 					<Messages />
 					<MessageInput />

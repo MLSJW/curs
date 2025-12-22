@@ -64,7 +64,14 @@ const Message = ({ message }) => {
 			<div className={`chat-bubble text-white ${bubbleBgColor} ${shakeClass} pb-2 ${(message.type === "image" || message.type === "audio") ? "bg-transparent p-0" : ""}`}>
 				{renderMessageContent()}
 			</div>
-			<div className='chat-footer opacity-50 text-xs flex gap-1 items-center'>{formattedTime}</div>
+			<div className='chat-footer opacity-50 text-xs flex gap-1 items-center'>
+				{formattedTime}
+				{fromMe && (
+					<span className="ml-1">
+						{message.readBy && message.readBy.includes(selectedConversation.participant._id) ? 'Прочитано' : 'Отправлено'}
+					</span>
+				)}
+			</div>
 		</div>
 	);
 };
