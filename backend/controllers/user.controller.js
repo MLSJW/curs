@@ -56,3 +56,6 @@ export async function updateMyProfile(req, res) {
 		res.status(500).json({ error: "Ошибка на сервере" });
 	}
 };
+
+console.log("req.body:", req.body);
+console.log("req.file:", req.file);
