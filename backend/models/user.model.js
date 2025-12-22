@@ -41,6 +41,12 @@ const userSchema = new mongoose.Schema(
 		emailVerificationToken: {
 			type: String,
 		},
+		resetPasswordToken: {
+			type: String,
+		},
+		resetPasswordExpires: {
+			type: Date,
+		},
 		// createdAt, updatedAt => Member since <createdAt>
 	},
 	{ timestamps: true }

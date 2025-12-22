@@ -35,3 +35,31 @@ export const sendVerificationEmail = async (email, token) => {
         console.error('Error sending email:', error);
     }
 };
+
+export const sendResetPasswordEmail = async (email, token) => {
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+
+    const mailOptions = {
+        from: 'evg2000p@gmail.com',
+        to: email,
+        subject: 'Reset your password for Telega3',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>Password Reset Request</h2>
+                <p>You requested a password reset for your Telega3 account. Click the link below to reset your password:</p>
+                <a href="${resetUrl}" style="background-color: #2196F3; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; margin: 10px 0;">Reset Password</a>
+                <p>If the button doesn't work, copy and paste this link into your browser:</p>
+                <p>${resetUrl}</p>
+                <p>This link will expire in 1 hour.</p>
+                <p>If you didn't request this, please ignore this email.</p>
+            </div>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Reset password email sent to', email);
+    } catch (error) {
+        console.error('Error sending reset email:', error);
+    }
+};

@@ -6,6 +6,8 @@ import SignUp from "./pages/signup/SignUp";
 import Profile from "./pages/settings/Profile";
 import ProfileSettings from "./pages/settings/ProfileSettings";
 import VerifyEmail from "./pages/verify/VerifyEmail";
+import ForgotPassword from "./pages/forgot-password/ForgotPassword";
+import ResetPassword from "./pages/reset-password/ResetPassword";
 import { Toaster } from "react-hot-toast";
 import { useAuthContext } from "./context/AuthContext";
 
@@ -18,6 +20,8 @@ function App() {
 				<Route path='/login' element={authUser ? <Navigate to='/' /> : <Login />} />
 				<Route path='/signup' element={authUser ? <Navigate to='/' /> : <SignUp />} />
 				<Route path='/verify' element={<VerifyEmail />} />
+				<Route path='/forgot-password' element={<ForgotPassword />} />
+				<Route path='/reset-password' element={<ResetPassword />} />
 				<Route path='/profile' element={authUser ? <Profile /> : <Navigate to="/login" />} />
 				<Route path='/profile/settings' element={authUser ? <ProfileSettings /> : <Navigate to="/login" />} />
 			</Routes>

@@ -84,11 +84,11 @@ export const verifyEmail = async (req, res) => {
 export const login = async (req, res) => {
 	try {
 		const { username, password } = req.body;
-		const user = await User.findOne({ username });
+		const user = await User.findOne({ $or: [{ username }, { email: username }] });
 		const isPasswordCorrect = await bcrypt.compare(password, user?.password || "");
 
 		if (!user || !isPasswordCorrect) {
-			return res.status(400).json({ error: "Invalid username or password" });
+			return res.status(400).json({ error: "Invalid username/email or password" });
 		}
 
 		if (!user.emailVerified) {
@@ -107,6 +107,55 @@ export const login = async (req, res) => {
 	} catch (error) {
 		console.log("Ошибка входа в контроллер", error.message);
 		res.status(500).json({ error: "Ошибка на сервере 500" });
+	}
+};
+
+export const forgotPassword = async (req, res) => {
+	try {
+		const { email } = req.body;
+		const user = await User.findOne({ email });
+		if (!user) {
+			return res.status(400).json({ error: "Пользователь с таким email не найден" });
+		}
+
+		const resetToken = crypto.randomBytes(32).toString('hex');
+		user.resetPasswordToken = resetToken;
+		user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+		await user.save();
+
+		await sendResetPasswordEmail(email, resetToken);
+
+		res.status(200).json({ message: "Ссылка для сброса пароля отправлена на email" });
+	} catch (error) {
+		console.log("Ошибка в forgotPassword:", error.message);
+		res.status(500).json({ error: "Ошибка на сервере" });
+	}
+};
+
+export const resetPassword = async (req, res) => {
+	try {
+		const { token, newPassword } = req.body;
+		const user = await User.findOne({
+			resetPasswordToken: token,
+			resetPasswordExpires: { $gt: Date.now() }
+		});
+
+		if (!user) {
+			return res.status(400).json({ error: "Неверный или истекший токен" });
+		}
+
+		const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+		user.password = hashedPassword;
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpires = undefined;
+		await user.save();
+
+		res.status(200).json({ message: "Пароль успешно сброшен" });
+	} catch (error) {
+		console.log("Ошибка в resetPassword:", error.message);
+		res.status(500).json({ error: "Ошибка на сервере" });
 	}
 };
 
