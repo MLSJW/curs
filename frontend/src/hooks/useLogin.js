@@ -27,23 +27,20 @@ const useLogin = () => {
 			localStorage.setItem("chat-user", JSON.stringify(data));
 			setAuthUser(data);
 
-			let privateKeyBase64 = localStorage.getItem("private-key");
-			if (!privateKeyBase64) {
-				const keyPair = await generateKeyPair();
-				privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
-				localStorage.setItem("private-key", privateKeyBase64);
-				setPrivateKey(privateKeyBase64);
+			// Always generate new key pair on login to ensure consistency
+			const keyPair = await generateKeyPair();
+			const privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
+			const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
 
-				// Update public key on server
-				const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
-				await apiFetch("/api/auth/update-public-key", {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ publicKey: publicKeyBase64 }),
-				});
-			} else {
-				setPrivateKey(privateKeyBase64);
-			}
+			localStorage.setItem("private-key", privateKeyBase64);
+			setPrivateKey(privateKeyBase64);
+
+			// Update public key on server
+			await apiFetch("/api/auth/update-public-key", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ publicKey: publicKeyBase64 }),
+			});
 		} catch (error) {
 			toast.error(error.message);
 		} finally {
