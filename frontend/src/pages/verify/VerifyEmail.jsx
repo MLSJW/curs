@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const VerifyEmail = () => {
 	const [searchParams] = useSearchParams();
 	const [loading, setLoading] = useState(true);
 	const [message, setMessage] = useState("");
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const verify = async () => {
@@ -22,8 +23,10 @@ const VerifyEmail = () => {
 				if (data.error) {
 					throw new Error(data.error);
 				}
-				setMessage(data.message);
+				setMessage(data.message + ". Redirecting to login...");
 				toast.success(data.message);
+				// Redirect to login after 2 seconds
+				setTimeout(() => navigate("/login"), 2000);
 			} catch (error) {
 				setMessage(error.message);
 				toast.error(error.message);
