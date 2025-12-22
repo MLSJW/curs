@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { apiFetch } from "../../utils/api";
 
 const VerifyEmail = () => {
 	const [searchParams] = useSearchParams();
@@ -19,7 +18,7 @@ const VerifyEmail = () => {
 			}
 
 			try {
-				const res = await apiFetch(`/api/auth/verify?token=${token}`);
+				const res = await fetch(`/api/auth/verify?token=${token}`);
 				const data = await res.json();
 				if (data.error) {
 					throw new Error(data.error);
