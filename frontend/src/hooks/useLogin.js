@@ -27,30 +27,22 @@ const useLogin = () => {
 			localStorage.setItem("chat-user", JSON.stringify(data));
 			setAuthUser(data);
 
-			let oldPrivateKey = localStorage.getItem("private-key");
-			if (oldPrivateKey) {
-				// Save old key to array
-				let oldKeys = JSON.parse(localStorage.getItem("old-private-keys") || "[]");
-				if (!oldKeys.includes(oldPrivateKey)) {
-					oldKeys.push(oldPrivateKey);
-					localStorage.setItem("old-private-keys", JSON.stringify(oldKeys));
-				}
+			let privateKeyBase64 = localStorage.getItem("private-key");
+			if (!privateKeyBase64) {
+				// Generate new key pair only if none exists
+				const keyPair = await generateKeyPair();
+				privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
+				localStorage.setItem("private-key", privateKeyBase64);
+
+				// Update public key on server
+				const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
+				await apiFetch("/api/auth/update-public-key", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ publicKey: publicKeyBase64 }),
+				});
 			}
-
-			// Always generate new key pair on login to ensure consistency
-			const keyPair = await generateKeyPair();
-			const privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
-			const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
-
-			localStorage.setItem("private-key", privateKeyBase64);
 			setPrivateKey(privateKeyBase64);
-
-			// Update public key on server
-			await apiFetch("/api/auth/update-public-key", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ publicKey: publicKeyBase64 }),
-			});
 		} catch (error) {
 			toast.error(error.message);
 		} finally {

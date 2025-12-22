@@ -41,34 +41,7 @@ const useGetMessages = () => {
 								: "[Не удаётся расшифровать: отсутствует ключ]";
 							return { ...msg, type: msgType, message };
 						}
-
-						let decryptedKey;
-						let success = false;
-
-						// Try current private key
-						try {
-							decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
-							success = true;
-						} catch (e) {
-							// Try old keys
-							const oldKeys = JSON.parse(localStorage.getItem("old-private-keys") || "[]");
-							for (const oldKey of oldKeys) {
-								try {
-									const oldPrivateKeyObj = await importPrivateKey(oldKey);
-									decryptedKey = await decryptMessage(keyToUse, oldPrivateKeyObj);
-									success = true;
-									break;
-								} catch (e2) {
-									// Continue
-								}
-							}
-						}
-
-						if (!success) {
-							message = "Error decrypting message";
-							return { ...msg, type: msgType, message };
-						}
-
+						const decryptedKey = await decryptMessage(keyToUse, privateKeyObj);
 						const aesKey = await importAESKey(decryptedKey);
 						const encryptedData = JSON.parse(msg.message);
 						message = await decryptAES(encryptedData, aesKey);
