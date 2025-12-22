@@ -18,6 +18,9 @@ const useSignup = () => {
 			const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
 			const privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
 
+			localStorage.setItem("private-key", privateKeyBase64);
+			setPrivateKey(privateKeyBase64);
+
 			const res = await apiFetch("/api/auth/signup", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },

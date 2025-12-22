@@ -33,6 +33,14 @@ const useLogin = () => {
 				privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
 				localStorage.setItem("private-key", privateKeyBase64);
 				setPrivateKey(privateKeyBase64);
+
+				// Update public key on server
+				const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
+				await apiFetch("/api/auth/update-public-key", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ publicKey: publicKeyBase64 }),
+				});
 			} else {
 				setPrivateKey(privateKeyBase64);
 			}
