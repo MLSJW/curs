@@ -1,36 +1,20 @@
 import nodemailer from 'nodemailer';
 
-// For testing, use Ethereal (fake SMTP)
-// In production, replace with real SMTP or service like SendGrid
-
-const transporter = nodemailer.createTestAccount().then(account => {
-    return nodemailer.createTransporter({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-            user: account.user, // generated ethereal user
-            pass: account.pass, // generated ethereal password
-        },
-    });
-}).catch(err => {
-    console.error('Failed to create test account:', err);
-    // Fallback to console logging
-    return {
-        sendMail: (mailOptions) => {
-            console.log('Email would be sent:', mailOptions);
-            return Promise.resolve({ messageId: 'console-logged' });
-        }
-    };
+const transporter = nodemailer.createTransporter({
+    service: 'gmail',
+    auth: {
+        user: 'evg2000p@gmail.com',
+        pass: 'jyal lsts ozil isop',
+    },
 });
 
 export const sendVerificationEmail = async (email, token) => {
     const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/verify?token=${token}`;
 
     const mailOptions = {
-        from: '"Telega3" <noreply@telega3.com>', // sender address
-        to: email, // list of receivers
-        subject: 'Verify your email for Telega3', // Subject line
+        from: 'evg2000p@gmail.com',
+        to: email,
+        subject: 'Verify your email for Telega3',
         html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h2>Welcome to Telega3!</h2>
@@ -45,10 +29,8 @@ export const sendVerificationEmail = async (email, token) => {
     };
 
     try {
-        const transporterInstance = await transporter;
-        const info = await transporterInstance.sendMail(mailOptions);
-        console.log('Verification email sent:', nodemailer.getTestMessageUrl(info));
-        // For Ethereal, it provides a URL to view the email
+        await transporter.sendMail(mailOptions);
+        console.log('Verification email sent to', email);
     } catch (error) {
         console.error('Error sending email:', error);
     }
