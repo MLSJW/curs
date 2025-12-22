@@ -51,7 +51,7 @@ const Message = ({ message }) => {
 		}
 
 		// Текстовое сообщение (default или type === "text")
-		return <div>{message.message || ""}</div>;
+		return <div className="break-words">{message.message || ""}</div>;
 	};
 
 	return (

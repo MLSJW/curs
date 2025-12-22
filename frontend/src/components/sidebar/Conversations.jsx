@@ -20,10 +20,9 @@ const Conversations = () => {
 	const filtered = Array.isArray(conversations)
 		? conversations.filter(c => {
 			const name = c.participant?.fullName || "";
-			const username = c.participant?.username || "";
 			const q = filter.trim().toLowerCase();
 			if (!q) return true;
-			return name.toLowerCase().includes(q) || username.toLowerCase().includes(q);
+			return name.toLowerCase().includes(q);
 		})
 		: [];
 
