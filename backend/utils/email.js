@@ -37,7 +37,9 @@ export const sendVerificationEmail = async (email, token) => {
 };
 
 export const sendResetPasswordEmail = async (email, token) => {
+    console.log('Attempting to send reset email to:', email);
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+    console.log('Reset URL:', resetUrl);
 
     const mailOptions = {
         from: 'evg2000p@gmail.com',
@@ -58,8 +60,9 @@ export const sendResetPasswordEmail = async (email, token) => {
 
     try {
         await transporter.sendMail(mailOptions);
-        console.log('Reset password email sent to', email);
+        console.log('Reset password email sent successfully to', email);
     } catch (error) {
-        console.error('Error sending reset email:', error);
+        console.error('Error sending reset email:', error.message);
+        throw new Error('Failed to send reset email: ' + error.message);
     }
 };

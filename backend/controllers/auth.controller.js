@@ -113,18 +113,20 @@ export const login = async (req, res) => {
 export const forgotPassword = async (req, res) => {
 	try {
 		const { email } = req.body;
+		console.log("Forgot password request for email:", email);
 		const user = await User.findOne({ email });
 		if (!user) {
+			console.log("User not found for email:", email);
 			return res.status(400).json({ error: "Пользователь с таким email не найден" });
 		}
-
+		console.log("User found:", user.email);
 		const resetToken = crypto.randomBytes(32).toString('hex');
 		user.resetPasswordToken = resetToken;
 		user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 		await user.save();
-
+		console.log("Token saved, sending email...");
 		await sendResetPasswordEmail(email, resetToken);
-
+		console.log("Email sent successfully");
 		res.status(200).json({ message: "Ссылка для сброса пароля отправлена на email" });
 	} catch (error) {
 		console.log("Ошибка в forgotPassword:", error.message);
