@@ -34,6 +34,8 @@ export async function deleteMyAccount(req, res) {
 
 
 export async function updateMyProfile(req, res) {
+	console.log("req.body:", req.body);
+	console.log("req.file:", req.file);
 	try {
 		const userId = req.user._id;
 		const { fullName, username, password } = req.body;
@@ -57,5 +59,3 @@ export async function updateMyProfile(req, res) {
 	}
 };
 
-console.log("req.body:", req.body);
-console.log("req.file:", req.file);
