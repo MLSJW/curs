@@ -44,11 +44,6 @@ const Conversation = ({ conversation, lastIdx, onDelete }) => {
 				<div className='flex flex-col flex-1'>
 					<div className='flex gap-3 justify-between'>
 						<p className='font-bold text-gray-200'>{participant.fullName}</p>
-						<div className='flex items-center gap-2'>
-							{conversation.unreadCount > 0 && (
-								<span className='badge badge-error'>{conversation.unreadCount}</span>
-							)}
-						</div>
 					</div>
 					{lastMsg && (
 						<p className='text-sm text-gray-400 truncate'>

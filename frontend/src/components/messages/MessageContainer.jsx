@@ -15,6 +15,15 @@ const MessageContainer = () => {
 		return () => setSelectedConversation(null);
 	}, [setSelectedConversation]);
 
+	useEffect(() => {
+		if (selectedConversation?._id) {
+			fetch(`/api/messages/conversations/${selectedConversation._id}/read`, {
+				method: 'POST',
+				credentials: 'include',
+			}).catch(err => console.error('Error marking as read:', err));
+		}
+	}, [selectedConversation?._id]);
+
 	return (
 		<div className='md:min-w-[450px] flex flex-col flex-1'>
 			{!selectedConversation ? (
