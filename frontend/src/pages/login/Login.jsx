@@ -24,11 +24,11 @@ const Login = () => {
 				<form onSubmit={handleSubmit}>
 					<div>
 						<label className='label p-2'>
-							<span className='text-base label-text'>Username</span>
+							<span className='text-base label-text'>Username or Email</span>
 						</label>
 						<input
 							type='text'
-							placeholder='Введите никнейм'
+							placeholder='Введите никнейм или email'
 							className='w-full input input-bordered h-10'
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
