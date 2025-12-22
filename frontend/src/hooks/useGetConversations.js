@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSocketContext } from "../context/SocketContext";
 import { useAuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";
+import { apiFetch } from "../utils/api";
 
 const useGetConversations = () => {
 	const [loading, setLoading] = useState(false);
@@ -13,7 +14,7 @@ const useGetConversations = () => {
 		const getConversations = async () => {
 			setLoading(true);
 			try {
-				const res = await fetch("/api/messages/conversations", {
+				const res = await apiFetch("/api/messages/conversations", {
 					credentials: "include",
 				});
 				const data = await res.json();

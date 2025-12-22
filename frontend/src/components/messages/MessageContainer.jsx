@@ -5,6 +5,7 @@ import Messages from "./Messages";
 import { TiMessages } from "react-icons/ti";
 import { useAuthContext } from "../../context/AuthContext";
 import { useSocketContext } from "../../context/SocketContext";
+import { apiFetch } from "../../utils/api";
 
 const MessageContainer = () => {
 	const { selectedConversation, setSelectedConversation } = useConversation();
@@ -17,9 +18,8 @@ const MessageContainer = () => {
 
 	useEffect(() => {
 		if (selectedConversation?._id) {
-			fetch(`/api/messages/conversations/${selectedConversation._id}/read`, {
+			apiFetch(`/api/messages/conversations/${selectedConversation._id}/read`, {
 				method: 'POST',
-				credentials: 'include',
 			}).catch(err => console.error('Error marking as read:', err));
 		}
 	}, [selectedConversation?._id]);

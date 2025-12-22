@@ -2,6 +2,7 @@ import { useState } from "react";
 import { IoSearchSharp } from "react-icons/io5";
 import useConversation from "../../zustand/useConversation";
 import toast from "react-hot-toast";
+import { apiFetch } from "../../utils/api";
 
 const SearchInput = () => {
 	const [search, setSearch] = useState("");
@@ -15,7 +16,7 @@ const SearchInput = () => {
 		}
 
 		try {
-			const res = await fetch(`/api/users?search=${encodeURIComponent(search)}`);
+			const res = await apiFetch(`/api/users?search=${encodeURIComponent(search)}`);
 			const data = await res.json();
 			if (data.error) {
 				throw new Error(data.error);

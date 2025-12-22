@@ -2,6 +2,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { useAuthContext } from "../context/AuthContext";
 import { generateKeyPair, exportPublicKey, exportPrivateKey } from "../utils/crypto";
+import { apiFetch } from "../utils/api";
 
 const useSignup = () => {
 	const [loading, setLoading] = useState(false);
@@ -18,10 +19,9 @@ const useSignup = () => {
 			const publicKeyBase64 = await exportPublicKey(keyPair.publicKey);
 			const privateKeyBase64 = await exportPrivateKey(keyPair.privateKey);
 
-			const res = await fetch("/api/auth/signup", {
+			const res = await apiFetch("/api/auth/signup", {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				credentials: "include",
 				body: JSON.stringify({ fullName, username, email, password, confirmPassword, gender, publicKey: publicKeyBase64 }),
 			});
 

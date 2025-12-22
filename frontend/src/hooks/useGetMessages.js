@@ -3,6 +3,7 @@ import useConversation from "../zustand/useConversation";
 import toast from "react-hot-toast";
 import { decryptMessage, importPrivateKey, importAESKey, decryptAES } from "../utils/crypto";
 import { useAuthContext } from "../context/AuthContext";
+import { apiFetch } from "../utils/api";
 
 const useGetMessages = () => {
 	const [loading, setLoading] = useState(false);
@@ -13,9 +14,7 @@ const useGetMessages = () => {
 		const getMessages = async () => {
 			setLoading(true);
 			try {
-				const res = await fetch(`/api/messages/${selectedConversation.participant._id}`, {
-					credentials: "include",
-				});
+				const res = await apiFetch(`/api/messages/${selectedConversation.participant._id}`, {});
 				const data = await res.json();
 				if (data.error) throw new Error(data.error);
 				if (!Array.isArray(data.messages)) throw new Error("Invalid messages payload (expected array)");
@@ -61,9 +60,8 @@ const useGetMessages = () => {
 				// mark messages as read on server for this conversation
 				if (data.conversationId) {
 					try {
-						await fetch(`/api/messages/conversations/${data.conversationId}/read`, {
+						await apiFetch(`/api/messages/conversations/${data.conversationId}/read`, {
 							method: "POST",
-							credentials: "include",
 						});
 					} catch (err) {
 						console.error("Error marking conversation read:", err);

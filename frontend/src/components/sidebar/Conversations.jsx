@@ -1,13 +1,14 @@
 import useGetConversations from "../../hooks/useGetConversations";
 import Conversation from "./Conversation";
 import { useState } from "react";
+import { apiFetch } from "../../utils/api";
 
 const Conversations = () => {
 	const { loading, conversations, setConversations } = useGetConversations();
 
 	const handleDelete = async (conversationId) => {
 		try {
-			const res = await fetch(`/api/messages/conversations/${conversationId}`, { method: 'DELETE', credentials: 'include' });
+			const res = await apiFetch(`/api/messages/conversations/${conversationId}`, { method: 'DELETE' });
 			const data = await res.json();
 			if (data.error) throw new Error(data.error);
 			setConversations((prev) => prev.filter((c) => c._id !== conversationId));

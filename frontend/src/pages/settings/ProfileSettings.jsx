@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "../../utils/api";
 
 const ProfileSettings = () => {
   const { authUser, setAuthUser } = useAuthContext();
@@ -36,9 +37,8 @@ const ProfileSettings = () => {
       if (showPasswordForm && form.password) formData.append("password", form.password);
       if (profilePic) formData.append("profilePic", profilePic);
 
-      const res = await fetch("/api/users/me", {
+      const res = await apiFetch("/api/users/me", {
         method: "PATCH",
-        credentials: "include",
         body: formData
       });
       const data = await res.json();

@@ -3,6 +3,7 @@ import useConversation from "../zustand/useConversation";
 import toast from "react-hot-toast";
 import { encryptMessage, importPublicKey, generateAESKey, encryptAES, exportAESKey } from "../utils/crypto";
 import { useAuthContext } from "../context/AuthContext";
+import { apiFetch } from "../utils/api";
 
 const useSendMessage = () => {
 	const [loading, setLoading] = useState(false);
@@ -30,12 +31,11 @@ const useSendMessage = () => {
 			const senderPublicKey = await importPublicKey(authUser.publicKey);
 			const encryptedKeySender = await encryptMessage(aesKeyBase64, senderPublicKey);
 
-			const res = await fetch(`/api/messages/send/${selectedConversation.participant._id}`, {
+			const res = await apiFetch(`/api/messages/send/${selectedConversation.participant._id}`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
 				},
-				credentials: "include",
 				body: JSON.stringify({
 					message: JSON.stringify(encryptedData),
 					encryptedKey,
