@@ -37,7 +37,7 @@ const SignUp = () => {
 						</label>
 						<input
 							type='text'
-							placeholder='Максим Хомяков'
+							placeholder='Введите ваше имя и фамилию'
 							className='w-full input input-bordered  h-10'
 							value={inputs.fullName}
 							onChange={(e) => setInputs({ ...inputs, fullName: e.target.value })}
